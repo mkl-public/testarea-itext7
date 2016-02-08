@@ -29,18 +29,18 @@
   </properties>
 	<dependencies>
 		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>itextpdf</artifactId>
+	        <groupId>com.itextpdf</groupId>
+	        <artifactId>kernel</artifactId>
             <version>${itextpdf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
-			<artifactId>itext-xtra</artifactId>
+			<artifactId>layout</artifactId>
             <version>${itextpdf.version}</version>
 		</dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
-            <artifactId>itext-pdfa</artifactId>
+            <artifactId>io</artifactId>
             <version>${itextpdf.version}</version>
         </dependency>
         <dependency>
