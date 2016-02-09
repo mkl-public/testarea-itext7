@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.itextpdf.forms.PdfPageFormCopier;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -67,7 +68,7 @@ public class HeapOomDuringMerge
             System.out.println(i);
             PdfReader reader = new PdfReader(files[i]);
             PdfDocument sourceDocument = new PdfDocument(reader);
-            sourceDocument.copyPagesTo(1, sourceDocument.getNumberOfPages(), pdfDocument);
+            sourceDocument.copyPagesTo(1, sourceDocument.getNumberOfPages(), pdfDocument, new PdfPageFormCopier());
             sourceDocument.close();
             reader.close();
         }

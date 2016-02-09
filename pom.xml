@@ -44,6 +44,11 @@
             <version>${itextpdf.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>forms</artifactId>
+            <version>${itextpdf.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
           <version>${junit.version}</version>
