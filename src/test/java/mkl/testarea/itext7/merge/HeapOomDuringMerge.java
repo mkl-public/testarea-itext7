@@ -34,9 +34,9 @@ public class HeapOomDuringMerge
      * </a>
      * <p>
      * Indeed, quite some memory is required to do this merger, but on Java 8 I actually
-     * needed 725 MB (-Xmx725m) with iText 5 and 500 MB with iText 7 for 
-     * <code>smart = false</code>. For <code>smart = true</code>, on the other hand, I
-     * needed 700 MB with iText 5 while even 2 GB did not suffice for iText 7 RC1. 
+     * needed 725 MB (-Xmx725m) with iText 5 and 400 MB with iText 7 for 
+     * <code>smart = false</code>. For <code>smart = true</code> I needed 700 MB with
+     * iText 5 and also 400 MB for iText 7. Unfortunately the latter result PDF was broken. 
      * </p>
      * 
      * @see mkl.testarea.itext5.merge.HeapOomDuringMerge
@@ -53,13 +53,13 @@ public class HeapOomDuringMerge
             stArray[i]=ifs2;
         }
 
-        mergeFiles(stArray,result, false);
+        mergeFiles(stArray,result, true);
     }
 
     public static void mergeFiles(String[] files, String result, boolean smart) throws IOException
     {
         PdfWriter writer = new PdfWriter(new FileOutputStream(result));
-        writer.setSmartCopyMode(smart);
+        writer.setSmartMode(smart);
         PdfDocument pdfDocument = new PdfDocument(writer);
 
         for (int i = 0; i < files.length; i++)
@@ -67,7 +67,7 @@ public class HeapOomDuringMerge
             System.out.println(i);
             PdfReader reader = new PdfReader(files[i]);
             PdfDocument sourceDocument = new PdfDocument(reader);
-            sourceDocument.copyPages(1, sourceDocument.getNumberOfPages(), pdfDocument);
+            sourceDocument.copyPagesTo(1, sourceDocument.getNumberOfPages(), pdfDocument);
             sourceDocument.close();
             reader.close();
         }
