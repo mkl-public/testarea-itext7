@@ -37,7 +37,7 @@ public class HeapOomDuringMerge
      * Indeed, quite some memory is required to do this merger, but on Java 8 I actually
      * needed 725 MB (-Xmx725m) with iText 5 and 400 MB with iText 7 for 
      * <code>smart = false</code>. For <code>smart = true</code> I needed 700 MB with
-     * iText 5 and also 400 MB for iText 7. Unfortunately the latter result PDF was broken. 
+     * iText 5 and also 175 MB for iText 7.
      * </p>
      * 
      * @see mkl.testarea.itext5.merge.HeapOomDuringMerge
@@ -54,7 +54,7 @@ public class HeapOomDuringMerge
             stArray[i]=ifs2;
         }
 
-        mergeFiles(stArray,result, true);
+        mergeFiles(stArray,result, false);
     }
 
     public static void mergeFiles(String[] files, String result, boolean smart) throws IOException
