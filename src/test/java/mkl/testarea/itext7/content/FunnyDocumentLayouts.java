@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -55,4 +56,26 @@ public class FunnyDocumentLayouts
         doc.close();
     }
 
+    /**
+     * Render into a document with a pagesize not having the origin at the lower left.
+     */
+    @Test
+    public void testNonOriginMediaBox() throws FileNotFoundException
+    {
+        FileOutputStream fos = new FileOutputStream(new File(RESULT_FOLDER, "nonOriginMediaBox.pdf"));
+        PdfWriter writer = new PdfWriter(fos);
+        
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        Document doc = new Document(pdfDoc, new PageSize(new Rectangle(595, 842, 595, 842)));
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(0);
+        for (int i = 1; i < 1000; i++)
+        {
+            builder.append(' ').append(i);
+        }
+        
+        doc.add(new Paragraph(builder.toString()).setBackgroundColor(Color.YELLOW));
+        doc.close();
+    }
 }
