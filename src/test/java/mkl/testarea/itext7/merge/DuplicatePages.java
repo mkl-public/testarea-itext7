@@ -4,6 +4,7 @@ package mkl.testarea.itext7.merge;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,6 +44,26 @@ public class DuplicatePages
             PdfMerger pdfMerger = new PdfMerger(pdfDocument);
             pdfMerger.addPages(sourceDocument, 1, sourceDocument.getNumberOfPages());
             pdfMerger.addPages(sourceDocument, 1, sourceDocument.getNumberOfPages());
+            pdfMerger.merge();
+        }
+    }
+
+    /**
+     * Copying pages multiple times into the new PDF works all right.
+     */
+    @Test
+    public void testMergeDuplicatePagesTwo() throws IOException
+    {
+        String ifs2 = "src\\test\\resources\\mkl\\testarea\\itext7\\merge\\pro-linq-in-c-2010.pdf";
+        File result = new File(RESULT_FOLDER, "pro-linq-in-c-2010-twiceTitle.pdf");
+        
+        try (   PdfReader reader = new PdfReader(ifs2);
+                PdfDocument sourceDocument = new PdfDocument(reader);
+                PdfWriter writer = new PdfWriter(new FileOutputStream(result));
+                PdfDocument pdfDocument = new PdfDocument(writer)   )
+        {
+            PdfMerger pdfMerger = new PdfMerger(pdfDocument);
+            pdfMerger.addPages(sourceDocument, Arrays.asList(1, 1));
             pdfMerger.merge();
         }
     }
