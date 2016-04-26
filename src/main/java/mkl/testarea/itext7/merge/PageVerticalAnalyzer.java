@@ -10,15 +10,15 @@ import java.util.Set;
 import com.itextpdf.kernel.geom.LineSegment;
 import com.itextpdf.kernel.geom.Matrix;
 import com.itextpdf.kernel.geom.Path;
-import com.itextpdf.kernel.geom.Point2D;
+import com.itextpdf.kernel.geom.Point;
 import com.itextpdf.kernel.geom.Subpath;
 import com.itextpdf.kernel.geom.Vector;
-import com.itextpdf.kernel.parser.EventData;
-import com.itextpdf.kernel.parser.EventListener;
-import com.itextpdf.kernel.parser.EventType;
-import com.itextpdf.kernel.parser.ImageRenderInfo;
-import com.itextpdf.kernel.parser.PathRenderInfo;
-import com.itextpdf.kernel.parser.TextRenderInfo;
+import com.itextpdf.kernel.pdf.canvas.parser.EventType;
+import com.itextpdf.kernel.pdf.canvas.parser.data.IEventData;
+import com.itextpdf.kernel.pdf.canvas.parser.data.ImageRenderInfo;
+import com.itextpdf.kernel.pdf.canvas.parser.data.PathRenderInfo;
+import com.itextpdf.kernel.pdf.canvas.parser.data.TextRenderInfo;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.IEventListener;
 
 /**
  * This rendering {@link EventListener} looks for vertical <em>sections of use</em> on a page.
@@ -27,7 +27,7 @@ import com.itextpdf.kernel.parser.TextRenderInfo;
  * 
  * @author mkl
  */
-public class PageVerticalAnalyzer implements EventListener
+public class PageVerticalAnalyzer implements IEventListener
 {
     public PageVerticalAnalyzer()
     {
@@ -46,7 +46,7 @@ public class PageVerticalAnalyzer implements EventListener
     // EventListener implementation
     // 
     @Override
-    public void eventOccurred(EventData data, EventType type)
+    public void eventOccurred(IEventData data, EventType type)
     {
         switch (type)
         {
@@ -75,7 +75,7 @@ public class PageVerticalAnalyzer implements EventListener
                 for (Subpath subpath : path.getSubpaths())
                 {
                     List<Float> yCoords = new ArrayList<Float>();
-                    for (Point2D point2d : subpath.getPiecewiseLinearApproximation())
+                    for (Point point2d : subpath.getPiecewiseLinearApproximation())
                     {
                         Vector vector = new Vector((float)point2d.getX(), (float)point2d.getY(), 1);
                         vector = vector.cross(ctm);
