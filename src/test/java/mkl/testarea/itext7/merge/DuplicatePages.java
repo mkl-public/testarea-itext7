@@ -42,9 +42,9 @@ public class DuplicatePages
                 PdfDocument pdfDocument = new PdfDocument(writer)   )
         {
             PdfMerger pdfMerger = new PdfMerger(pdfDocument);
-            pdfMerger.addPages(sourceDocument, 1, sourceDocument.getNumberOfPages());
-            pdfMerger.addPages(sourceDocument, 1, sourceDocument.getNumberOfPages());
-            pdfMerger.merge();
+            pdfMerger.merge(sourceDocument, 1, sourceDocument.getNumberOfPages());
+            pdfMerger.merge(sourceDocument, 1, sourceDocument.getNumberOfPages());
+            pdfMerger.close();
         }
     }
 
@@ -63,8 +63,8 @@ public class DuplicatePages
                 PdfDocument pdfDocument = new PdfDocument(writer)   )
         {
             PdfMerger pdfMerger = new PdfMerger(pdfDocument);
-            pdfMerger.addPages(sourceDocument, Arrays.asList(1, 1));
-            pdfMerger.merge();
+            pdfMerger.merge(sourceDocument, Arrays.asList(1, 1));
+            pdfMerger.close();
         }
     }
 
