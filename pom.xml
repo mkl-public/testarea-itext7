@@ -24,7 +24,7 @@
 
   <properties>
     <junit.version>4.7</junit.version>
-    <itextpdf.version>7.0.0-SNAPSHOT</itextpdf.version>
+    <itextpdf.version>7.0.1-SNAPSHOT</itextpdf.version>
     <bouncycastle.version>1.49</bouncycastle.version>
   </properties>
 	<dependencies>
@@ -46,6 +46,11 @@
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>forms</artifactId>
+            <version>${itextpdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>sign</artifactId>
             <version>${itextpdf.version}</version>
         </dependency>
         <dependency>
