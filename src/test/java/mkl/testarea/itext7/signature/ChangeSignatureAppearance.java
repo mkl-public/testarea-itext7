@@ -18,7 +18,9 @@ import com.itextpdf.forms.fields.PdfFormField;
 import com.itextpdf.kernel.color.Color;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfArray;
+import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
@@ -133,6 +135,74 @@ public class ChangeSignatureAppearance
                     canvas.add(new Paragraph().setBold().add(signerName));
 
                     pdfWidgetAnnotation.setNormalAppearance(form.getPdfObject());
+                }
+            }
+        }
+    }
+
+    /**
+     * <a href="http://stackoverflow.com/questions/37027579/how-to-associate-a-previous-signature-in-a-new-signature-field">
+     * How to associate a previous signature in a new signature field
+     * </a>
+     * <br/>
+     * <a href="http://185.49.12.119/~pogdan/7spacedot/monitor_2016_99.pdf">
+     * monitor_2016_99.pdf
+     * </a>, <em>a sample file from 
+     * <a href="http://stackoverflow.com/questions/37439613/itextpdf-insert-space-beetwen-7-and-dot-after-extract-text">
+     * another question.
+     * </a></em>
+     * <p>
+     * Similarly to {@link #testChangeAppearancesWithName()}, this test adds signature
+     * appearances not breaking signature validity containing the signer certificate
+     * subject common name, but this time it adds an appearance to each page.
+     * </p>
+     * <p>
+     * The sample file already has an appearance on one page. This appearance is forcefully removed.
+     * </p>
+     */
+    @Test
+    public void testChangeAppearancesWithNameAllPages() throws IOException
+    {
+        try (   InputStream resource = getClass().getResourceAsStream("monitor_2016_99.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "monitor_2016_99-app-name-all.pdf"));
+                PdfWriter pdfWriter = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().useAppendMode()))
+        {
+            SignatureUtil signatureUtil = new SignatureUtil(pdfDocument);
+            PdfAcroForm acroForm = PdfAcroForm.getAcroForm(pdfDocument, false);
+
+            for (String name : signatureUtil.getSignatureNames())
+            {
+                PdfPKCS7 pkcs7 = signatureUtil.verifySignature(name);
+                X509Certificate signerCert = (X509Certificate) pkcs7.getSigningCertificate();
+                String signerName = CertificateInfo.getSubjectFields(signerCert).getField("CN");
+                PdfFormField field = acroForm.getField(name);
+                field.setModified();
+
+                Rectangle rectangle = new Rectangle(100, 100);
+                PdfFormXObject form = new PdfFormXObject(rectangle);
+                Canvas canvas = new Canvas(form, pdfDocument);
+                canvas.add(new Paragraph().setItalic().add("Signed by:"));
+                canvas.add(new Paragraph().setBold().add(signerName));
+
+                for (PdfWidgetAnnotation pdfWidgetAnnotation : field.getWidgets())
+                {
+                    PdfDictionary pageObject = pdfWidgetAnnotation.getPageObject();
+                    PdfPage page = pdfDocument.getPage(pageObject);
+                    page.removeAnnotation(pdfWidgetAnnotation);
+                    
+                    pdfWidgetAnnotation.releaseFormFieldFromWidgetAnnotation();
+                }
+
+                for (int pageNumber = 1; pageNumber <= pdfDocument.getNumberOfPages(); pageNumber++)
+                {
+                    PdfPage pdfPage = pdfDocument.getPage(pageNumber);
+                    PdfWidgetAnnotation pdfWidgetAnnotation = new PdfWidgetAnnotation(rectangle);
+                    pdfWidgetAnnotation.setNormalAppearance(form.getPdfObject());
+                    pdfWidgetAnnotation.setPage(pdfPage);
+                    field.addKid(pdfWidgetAnnotation);
+                    pdfPage.addAnnotation(pdfWidgetAnnotation);
                 }
             }
         }
