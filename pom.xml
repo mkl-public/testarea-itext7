@@ -24,7 +24,7 @@
 
   <properties>
     <junit.version>4.7</junit.version>
-    <itextpdf.version>7.0.1</itextpdf.version>
+    <itextpdf.version>7.0.2-SNAPSHOT</itextpdf.version>
     <bouncycastle.version>1.49</bouncycastle.version>
   </properties>
 	<dependencies>
