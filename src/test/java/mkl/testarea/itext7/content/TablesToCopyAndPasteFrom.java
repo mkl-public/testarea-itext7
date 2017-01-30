@@ -34,6 +34,10 @@ public class TablesToCopyAndPasteFrom
      * Setting the <code>PdfDocument</code> attribute <code>Tagged</code> improves table extraction.
      * But some glitches remain.
      * </p>
+     * <p>
+     * <b>PS:</b> The glitch with the <em>vanishing space between "head" and the number</em> appears to
+     * have been fixed in the iText development version 7.0.2-SNAPSHOT in check-ins on January 27th, 2017.
+     * </p>
      */
     @Test
     public void testCreateCaosTables() throws IOException
