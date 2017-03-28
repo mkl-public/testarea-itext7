@@ -22,60 +22,65 @@
 		</plugins>
 	</build>
 
-  <properties>
-    <junit.version>4.7</junit.version>
-    <itextpdf.version>7.0.3-SNAPSHOT</itextpdf.version>
-    <cleanup.version>1.0.2-SNAPSHOT</cleanup.version>
-    <bouncycastle.version>1.49</bouncycastle.version>
-  </properties>
+	<properties>
+		<junit.version>4.7</junit.version>
+		<itextpdf.version>7.0.3-SNAPSHOT</itextpdf.version>
+		<cleanup.version>1.0.2-SNAPSHOT</cleanup.version>
+		<bouncycastle.version>1.49</bouncycastle.version>
+	</properties>
 	<dependencies>
 		<dependency>
-	        <groupId>com.itextpdf</groupId>
-	        <artifactId>kernel</artifactId>
-            <version>${itextpdf.version}</version>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>kernel</artifactId>
+			<version>${itextpdf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>layout</artifactId>
-            <version>${itextpdf.version}</version>
+			<version>${itextpdf.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>io</artifactId>
-            <version>${itextpdf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>forms</artifactId>
-            <version>${itextpdf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>sign</artifactId>
-            <version>${itextpdf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-          <version>${junit.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>cleanup</artifactId>
-            <version>${cleanup.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>io</artifactId>
+			<version>${itextpdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>forms</artifactId>
+			<version>${itextpdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>sign</artifactId>
+			<version>${itextpdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>${bouncycastle.version}</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>cleanup</artifactId>
+			<version>${cleanup.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>21.0</version>
+		</dependency>
 	</dependencies>
 </project>
