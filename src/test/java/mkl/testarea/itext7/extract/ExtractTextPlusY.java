@@ -2,6 +2,8 @@ package mkl.testarea.itext7.extract;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Test;
 
@@ -62,6 +64,14 @@ public class ExtractTextPlusY
                     lastY = y;
                 }
                 System.out.print(textPlusY.charAt(i));
+            }
+            System.out.print("\n=====\n");
+
+            System.out.print("\nMatches of 'est' with y from test.pdf\n=====\n");
+            Matcher matcher = Pattern.compile("est").matcher(textPlusY);
+            while (matcher.find())
+            {
+                System.out.printf("from character %s to %s at y position (%4.1f)\n", matcher.start(), matcher.end(), textPlusY.yCoordAt(matcher.start()));
             }
             System.out.print("\n=====\n");
         }
