@@ -6,7 +6,7 @@
 	<artifactId>testarea-itext7</artifactId>
 	<packaging>jar</packaging>
 	<name>Test area for iText v7</name>
-	<version>7.0.3</version>
+	<version>7.0.4-SNAPSHOT</version>
 
 	<build>
 		<plugins>
@@ -24,7 +24,7 @@
 
 	<properties>
 		<junit.version>4.7</junit.version>
-		<itextpdf.version>7.0.3</itextpdf.version>
+		<itextpdf.version>${project.version}</itextpdf.version>
 		<cleanup.version>1.0.2-SNAPSHOT</cleanup.version>
 		<bouncycastle.version>1.49</bouncycastle.version>
 	</properties>
