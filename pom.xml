@@ -25,7 +25,8 @@
 	<properties>
 		<junit.version>4.7</junit.version>
 		<itextpdf.version>${project.version}</itextpdf.version>
-		<cleanup.version>1.0.2-SNAPSHOT</cleanup.version>
+		<cleanup.version>1.0.3-SNAPSHOT</cleanup.version>
+		<html2pdf.version>1.0.1-SNAPSHOT</html2pdf.version>
 		<bouncycastle.version>1.49</bouncycastle.version>
 	</properties>
 	<dependencies>
@@ -77,6 +78,11 @@
 			<artifactId>cleanup</artifactId>
 			<version>${cleanup.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>html2pdf</artifactId>
+            <version>${html2pdf.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
