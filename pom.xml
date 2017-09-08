@@ -6,7 +6,7 @@
 	<artifactId>testarea-itext7</artifactId>
 	<packaging>jar</packaging>
 	<name>Test area for iText v7</name>
-	<version>7.0.4</version>
+	<version>7.0.5-SNAPSHOT</version>
 
 	<build>
 		<plugins>
