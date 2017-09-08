@@ -2,4 +2,4 @@
 /.settings/
 /.classpath
 /.project
-/itextkey-multiple-products.xml
+/itextkey-*.xml
