@@ -21,6 +21,7 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.licensekey.LicenseKey;
 import com.itextpdf.pdfcleanup.PdfCleanUpLocation;
+import com.itextpdf.pdfcleanup.PdfCleanUpProcessor;
 import com.itextpdf.pdfcleanup.PdfCleanUpTool;
 
 
@@ -88,4 +89,56 @@ public class Redact
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/44304695/itext-5-5-11-bold-text-looks-blurry-after-using-pdfcleanupprocessor">
+     * iText 5.5.11 - bold text looks blurry after using PdfCleanUpProcessor
+     * </a>
+     * <br/>
+     * <a href="http://s000.tinyupload.com/index.php?file_id=52420782334200922303">
+     * before.pdf
+     * </a>
+     * <p>
+     * By comparing the before and after files it becomes clear that for some reason
+     * the {@link PdfCleanUpProcessor} falsely drops general graphics state operations
+     * (at least w, J, and d).
+     * </p>
+     * <p>
+     * In the before document in particular the w operation is important for the text
+     * because a poor man's bold variant is used, i.e. instead of using an actual bold
+     * font the normal font is used and the text rendering mode is set to not only fill
+     * the glyph contours but also draw a line along it giving it a bold'ish appearance.
+     * </p>
+     * <p>
+     * The width of that line is set to 0.23333 using a w operation. As that operation
+     * is missing in the after document, the default width value of 1 is used. Thus,
+     * the line along the contour now is 4 times as big as before resulting in a very
+     * fat appearance.
+     * </p>
+     * <p>
+     * Unfortunately this test actually shows a different error: the observations above
+     * have been made by comparison with an additional "after.pdf" provided by the OP,
+     * not with the output of this test. The cause: before.pdf and after.pdf had been
+     * redacted by a different tool before being shared, and the way this tools redacts
+     * makes iText cleanup fail: It leaves TJ operations with only numbers inside which
+     * makes iText throw an exception.
+     * </p>
+     */
+    @Test
+    public void testRedactLikeTieco() throws IOException
+    {
+        LicenseKey.loadLicenseFile("itextkey-multiple-products.xml");
+
+        try (   InputStream resource = getClass().getResourceAsStream("before.pdf");
+                PdfReader reader = new PdfReader(resource);
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "before-redacted.pdf"));
+                PdfWriter writer = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(reader, writer)   )
+        {
+            List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
+            cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(0f, 0f, 595f, 680f)));
+
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
+            cleaner.cleanUp();
+        }
+    }
 }
