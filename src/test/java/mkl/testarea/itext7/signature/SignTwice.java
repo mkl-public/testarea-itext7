@@ -114,8 +114,12 @@ public class SignTwice {
      * hello.pdf
      * </a> as signed2-2-fixed.pdf
      * <p>
-     * The OP's original file contains an empty Outlines dictionary. Hiding
-     * it (by renaming Outlines -> Xutlines) makes Adobe Reader happy again. 
+     * The OP's original file uses an empty indirect dictionary both as Info
+     * and as Outlines dictionary. During signature creation iText fills this
+     * Info dictionary and so changes the outlines. This is forbidden.
+     * <p>
+     * </p>
+     * Using different empty dictionaries makes Adobe Reader happy again. 
      * </p>
      * @see #testSignTwiceLikeJDNew()
      * @see #testSignTwiceLikeJDNewFirstRevision()
