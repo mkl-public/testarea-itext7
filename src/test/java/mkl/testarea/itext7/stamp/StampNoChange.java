@@ -5,15 +5,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.tagging.IPdfStructElem;
 import com.itextpdf.kernel.pdf.tagging.PdfStructTreeRoot;
+import com.itextpdf.signatures.IExternalSignatureContainer;
+import com.itextpdf.signatures.PdfSigner;
 
 /**
  * @author mkl
@@ -67,6 +72,118 @@ public class StampNoChange
                 OutputStream dest = new FileOutputStream(target))
         {
             PdfReader reader = new PdfReader(resource);
+            PdfWriter writer = new PdfWriter(dest);
+            PdfDocument doc = new PdfDocument(reader, writer);
+            doc.close();
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/47281240/append-mode-requires-a-document-without-errors-even-if-recovery-is-possible">
+     * Append mode requires a document without errors, even if recovery is possible
+     * </a>
+     * <br/>
+     * <a href="https://www.dropbox.com/s/i7eeamw9xouf76l/word.pdf?dl=0">
+     * word.pdf
+     * </a>
+     * <p>
+     * This test reproduces the issue observed by the OP: A first stamping
+     * seems to work but the second one throws an error. The cause is that
+     * the first stamping already created a broken result which makes the
+     * second one stumble.
+     * </p>
+     * @see #testAppendWordSigning()
+     * @see #testNoAppendWord()
+     */
+    @Test
+    public void testAppendWord() throws IOException
+    {
+        File target = new File(RESULT_FOLDER, "word-append.pdf");
+        try (   InputStream resource = getClass().getResourceAsStream("word.pdf");
+                OutputStream dest = new FileOutputStream(target))
+        {
+            PdfReader reader = new PdfReader(resource);
+            PdfWriter writer = new PdfWriter(dest);
+            PdfDocument doc = new PdfDocument(reader, writer, new StampingProperties().useAppendMode());
+            doc.close();
+        }
+        File secondTarget = new File(RESULT_FOLDER, "word-append-again.pdf");
+        try (   OutputStream dest = new FileOutputStream(secondTarget))
+        {
+            PdfReader reader = new PdfReader(target);
+            PdfWriter writer = new PdfWriter(dest);
+            PdfDocument doc = new PdfDocument(reader, writer, new StampingProperties().useAppendMode());
+            doc.close();
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/47281240/append-mode-requires-a-document-without-errors-even-if-recovery-is-possible">
+     * Append mode requires a document without errors, even if recovery is possible
+     * </a>
+     * <br/>
+     * <a href="https://www.dropbox.com/s/i7eeamw9xouf76l/word.pdf?dl=0">
+     * word.pdf
+     * </a>
+     * <p>
+     * This test shows that the issue is not bound to the signing use case
+     * during which the OP observed it: Signing simply produces the same
+     * fault in the result document as arbitrary stamping does in the test
+     * {@link #testAppendWord()}.
+     * </p>
+     */
+    @Test
+    public void testAppendWordSigning() throws IOException, GeneralSecurityException
+    {
+        File target = new File(RESULT_FOLDER, "word-signed.pdf");
+        try (   InputStream resource = getClass().getResourceAsStream("word.pdf");
+                OutputStream dest = new FileOutputStream(target))
+        {
+            PdfReader reader = new PdfReader(resource);
+            PdfSigner signer = new PdfSigner(reader, dest, true);
+            signer.signExternalContainer(new IExternalSignatureContainer() {
+                @Override
+                public byte[] sign(InputStream data) throws GeneralSecurityException {
+                    return "dummy signature".getBytes();
+                }
+                
+                @Override
+                public void modifySigningDictionary(PdfDictionary signDic) {
+                }
+            }, 4096);
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/47281240/append-mode-requires-a-document-without-errors-even-if-recovery-is-possible">
+     * Append mode requires a document without errors, even if recovery is possible
+     * </a>
+     * <br/>
+     * <a href="https://www.dropbox.com/s/i7eeamw9xouf76l/word.pdf?dl=0">
+     * word.pdf
+     * </a>
+     * <p>
+     * This test shows that the issue is related to the append
+     * mode: Without appending everything works just fine.
+     * </p>
+     * @see #testAppendWord()
+     */
+    @Test
+    public void testNoAppendWord() throws IOException
+    {
+        File target = new File(RESULT_FOLDER, "word-stamp.pdf");
+        try (   InputStream resource = getClass().getResourceAsStream("word.pdf");
+                OutputStream dest = new FileOutputStream(target))
+        {
+            PdfReader reader = new PdfReader(resource);
+            PdfWriter writer = new PdfWriter(dest);
+            PdfDocument doc = new PdfDocument(reader, writer);
+            doc.close();
+        }
+        File secondTarget = new File(RESULT_FOLDER, "word-stamp-again.pdf");
+        try (   OutputStream dest = new FileOutputStream(secondTarget))
+        {
+            PdfReader reader = new PdfReader(target);
             PdfWriter writer = new PdfWriter(dest);
             PdfDocument doc = new PdfDocument(reader, writer);
             doc.close();
