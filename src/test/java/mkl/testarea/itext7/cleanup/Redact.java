@@ -1,6 +1,3 @@
-/**
- * 
- */
 package mkl.testarea.itext7.cleanup;
 
 import java.io.File;
@@ -14,7 +11,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -24,10 +21,8 @@ import com.itextpdf.pdfcleanup.PdfCleanUpLocation;
 import com.itextpdf.pdfcleanup.PdfCleanUpProcessor;
 import com.itextpdf.pdfcleanup.PdfCleanUpTool;
 
-
 /**
- * @author mklink
- *
+ * @author mkl
  */
 public class Redact
 {
@@ -73,14 +68,14 @@ public class Redact
             for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                 if (currentPage == 1) {
                     cleanUpLocations.add(new PdfCleanUpLocation(currentPage,
-                            linkLocation1, Color.BLACK));
+                            linkLocation1, ColorConstants.BLACK));
                     cleanUpLocations.add(new PdfCleanUpLocation(currentPage,
-                            linkLocation2, Color.BLACK));
+                            linkLocation2, ColorConstants.BLACK));
                     cleanUpLocations.add(new PdfCleanUpLocation(currentPage,
-                            linkLocation3, Color.BLACK));
+                            linkLocation3, ColorConstants.BLACK));
                 } else {
                     cleanUpLocations.add(new PdfCleanUpLocation(currentPage,
-                            linkLocation1, Color.BLACK));
+                            linkLocation1, ColorConstants.BLACK));
                 }
             }
 

@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.itextpdf.kernel.geom.Vector;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.LocationTextExtractionStrategy;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.TextChunk;
 
 /**
  * <a href="http://stackoverflow.com/questions/43746884/how-to-get-the-text-position-from-the-pdf-page-in-itext-7">

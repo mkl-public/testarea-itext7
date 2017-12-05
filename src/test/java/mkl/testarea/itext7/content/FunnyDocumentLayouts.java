@@ -5,15 +5,18 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.ColumnDocumentRenderer;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.renderer.DocumentRenderer;
 
 /**
  * Experiments with document layout structures.
@@ -52,7 +55,7 @@ public class FunnyDocumentLayouts
             builder.append(' ').append(i);
         }
         
-        doc.add(new Paragraph(builder.toString()).setBackgroundColor(Color.YELLOW));
+        doc.add(new Paragraph(builder.toString()).setBackgroundColor(ColorConstants.YELLOW));
         doc.close();
     }
 
@@ -75,7 +78,38 @@ public class FunnyDocumentLayouts
             builder.append(' ').append(i);
         }
         
-        doc.add(new Paragraph(builder.toString()).setBackgroundColor(Color.YELLOW));
+        doc.add(new Paragraph(builder.toString()).setBackgroundColor(ColorConstants.YELLOW));
         doc.close();
+    }
+
+    @Ignore
+    @Test
+    public void testMultipleRenderers() throws FileNotFoundException
+    {
+        FileOutputStream fos = new FileOutputStream(new File(RESULT_FOLDER, "multipleRenderers.pdf"));
+        PdfWriter writer = new PdfWriter(fos);
+        
+        PdfDocument pdfDoc = new PdfDocument(writer);
+
+
+        while (pdfDoc.getNumberOfPages() < 10) {
+            Document doc = new Document(pdfDoc);
+            doc.setRenderer(new DocumentRenderer(doc));
+            for (int i = 0; i < 15; i++)
+                doc.add(new Paragraph("THIS IS NORMAL TEXT"));
+            doc.flush();
+
+            doc = new Document(pdfDoc);
+            Rectangle effectiveArea = doc.getPageEffectiveArea(pdfDoc.getDefaultPageSize());
+            doc.setRenderer(new ColumnDocumentRenderer(doc, new Rectangle[]{
+                    effectiveArea.clone().setWidth(effectiveArea.getWidth() * 0.45f),
+                    effectiveArea.clone().setWidth(effectiveArea.getWidth() * 0.45f).setX(effectiveArea.getX() + effectiveArea.getWidth() * 0.55f)
+            }));
+            for (int i = 0; i < 30; i++)
+                doc.add(new Paragraph("THIS IS COLUMN TEXT"));
+            doc.flush();
+        }
+
+        pdfDoc.close();
     }
 }

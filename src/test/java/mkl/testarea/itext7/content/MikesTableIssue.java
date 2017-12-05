@@ -7,20 +7,21 @@ import java.io.IOException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.itextpdf.io.font.FontConstants;
-import com.itextpdf.kernel.color.Color;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.border.Border;
-import com.itextpdf.layout.border.SolidBorder;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.BlockElement;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.HorizontalAlignment;
 import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.UnitValue;
 import com.itextpdf.layout.property.VerticalAlignment;
 
 /**
@@ -58,7 +59,7 @@ public class MikesTableIssue
 
             Table mainTable = new Table(tableColumns)
                     .setBorder(Border.NO_BORDER)
-                    .setWidthPercent(100)
+                    .setWidth(UnitValue.createPercentValue(100))
                     .setHorizontalAlignment(HorizontalAlignment.LEFT)
                     .setPadding(0f);
 
@@ -75,15 +76,15 @@ public class MikesTableIssue
     {
         // Label
         addCell(table, col1, true, 1)
-            .setBorderTop(new SolidBorder(Color.BLACK, 0.5f));
+            .setBorderTop(new SolidBorder(ColorConstants.BLACK, 0.5f));
 
         // Product - Voucher and price/pcs        
         addCell(table, col2, true, 1)
-            .setBorderTop(new SolidBorder(Color.BLACK, 0.5f));
+            .setBorderTop(new SolidBorder(ColorConstants.BLACK, 0.5f));
 
         // Message
         addCell(table, col3, true, 2)
-            .setBorderTop(new SolidBorder(Color.BLACK, 0.5f))
+            .setBorderTop(new SolidBorder(ColorConstants.BLACK, 0.5f))
             //.SetBorderRight(new iText.Layout.Borders.SolidBorder(iText.Kernel.Colors.Color.BLACK, 0.5f))
             .setHorizontalAlignment(HorizontalAlignment.RIGHT)
             .setTextAlignment(TextAlignment.RIGHT);
@@ -114,7 +115,7 @@ public class MikesTableIssue
     {
         element
             .setBorder(Border.NO_BORDER)
-            .setFont(PdfFontFactory.createFont(FontConstants.HELVETICA))
+            .setFont(PdfFontFactory.createFont(StandardFonts.HELVETICA))
             .setFontSize(10.0f)
             .setFixedLeading(12.0f)
             .setVerticalAlignment(VerticalAlignment.BOTTOM)
@@ -137,9 +138,9 @@ public class MikesTableIssue
             Cell cell = new Cell()
                     .setBorder(Border.NO_BORDER)
                     //.setBorderRight(new SolidBorder(Color.BLACK, 0.5f))
-                    .setBorderTop(new SolidBorder(Color.BLACK, 0.5f));
+                    .setBorderTop(new SolidBorder(ColorConstants.BLACK, 0.5f));
 
-            cell.add("TESCHTINK");
+            cell.add(new Paragraph("TESCHTINK"));
             
             mainTable.addCell(cell);
 

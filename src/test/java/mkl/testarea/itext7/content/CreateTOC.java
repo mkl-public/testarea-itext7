@@ -13,7 +13,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.IEventHandler;
 import com.itextpdf.kernel.events.PdfDocumentEvent;
@@ -98,8 +98,8 @@ public class CreateTOC
         PageXofY event = new PageXofY(pdf);
         pdf.addEventHandler(PdfDocumentEvent.END_PAGE, event);
 
-        PdfFont font = PdfFontFactory.createFont(FontConstants.TIMES_ROMAN); 
-        PdfFont bold = PdfFontFactory.createFont(FontConstants.HELVETICA_BOLD); 
+        PdfFont font = PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN); 
+        PdfFont bold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD); 
 
         Document document = new Document(pdf); 
         document.setTextAlignment(TextAlignment.JUSTIFIED) 
@@ -194,7 +194,8 @@ public class CreateTOC
         PdfPage page; 
         for (int i = 0; i <= tocPages; i++)
         { 
-            page = pdf.removePage(startToc + i); 
+            page = pdf.getPage(startToc + i);
+            pdf.removePage(startToc + i); 
             pdf.addPage(i + 1, page); 
         } 
 

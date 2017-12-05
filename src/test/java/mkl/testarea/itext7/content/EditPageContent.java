@@ -11,9 +11,10 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.itextpdf.kernel.color.Color;
-import com.itextpdf.kernel.color.DeviceCmyk;
-import com.itextpdf.kernel.color.DeviceGray;
+import com.itextpdf.kernel.colors.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.colors.DeviceCmyk;
+import com.itextpdf.kernel.colors.DeviceGray;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfLiteral;
 import com.itextpdf.kernel.pdf.PdfNumber;
@@ -197,7 +198,7 @@ public class EditPageContent
                         if (currentlyReplacedBlack == null)
                         {
                             Color currentFillColor = getGraphicsState().getFillColor();
-                            if (Color.BLACK.equals(currentFillColor))
+                            if (ColorConstants.BLACK.equals(currentFillColor))
                             {
                                 currentlyReplacedBlack = currentFillColor;
                                 super.write(processor, new PdfLiteral("rg"), Arrays.asList(new PdfNumber(0), new PdfNumber(1), new PdfNumber(0), new PdfLiteral("rg")));

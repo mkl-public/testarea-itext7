@@ -12,6 +12,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 
 /**
@@ -44,22 +45,22 @@ public class CreateTable
                 Document doc = new Document(pdfDocument)   )
         {
             Table table = new Table(2, true);
-            table.addCell(new Cell().add("C1"));
-            table.addCell(new Cell().add("C2"));
+            table.addCell(new Cell().add(new Paragraph("C1")));
+            table.addCell(new Cell().add(new Paragraph("C2")));
             /*
             for (TaxTypeModel taxType : sale.getTaxModel().getTaxTypeModelList()) {
-                table.addCell(new Cell().add("C9"));
-                table.addCell(new Cell().add("C10"));
+                table.addCell(new Cell().add(new Paragraph("C9")));
+                table.addCell(new Cell().add(new Paragraph("C10")));
             }
             */
-            table.addCell(new Cell().add("C3"));
-            table.addCell(new Cell().add("C4"));
+            table.addCell(new Cell().add(new Paragraph("C3")));
+            table.addCell(new Cell().add(new Paragraph("C4")));
 
-            table.addCell(new Cell().add("C5"));
-            table.addCell(new Cell().add("C6"));
+            table.addCell(new Cell().add(new Paragraph("C5")));
+            table.addCell(new Cell().add(new Paragraph("C6")));
 
-            table.addCell(new Cell().add("C7"));
-            table.addCell(new Cell().add("C8"));
+            table.addCell(new Cell().add(new Paragraph("C7")));
+            table.addCell(new Cell().add(new Paragraph("C8")));
 
             doc.add(table);
             table.complete();

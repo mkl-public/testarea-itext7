@@ -1,4 +1,3 @@
-// $Id$
 package mkl.testarea.itext7.content;
 
 import java.io.File;
@@ -11,13 +10,13 @@ import org.junit.Test;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.border.Border;
+import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 
 /**
- * @author mklink
+ * @author mkl
  */
 public class RotateCellContent
 {

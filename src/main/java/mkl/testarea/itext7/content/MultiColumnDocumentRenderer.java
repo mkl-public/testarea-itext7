@@ -4,6 +4,7 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.layout.LayoutArea;
 import com.itextpdf.layout.layout.LayoutResult;
+import com.itextpdf.layout.layout.RootLayoutArea;
 import com.itextpdf.layout.renderer.DocumentRenderer;
 
 /**
@@ -28,7 +29,7 @@ public class MultiColumnDocumentRenderer extends DocumentRenderer
         {
             currentPageNumber = super.updateCurrentArea(overflowResult).getPageNumber();
         }
-        return (currentArea = new LayoutArea(currentPageNumber, rectangles[nextAreaNumber++ % rectangles.length]));
+        return (currentArea = new RootLayoutArea(currentPageNumber, rectangles[nextAreaNumber++ % rectangles.length]));
     }
 
     final Rectangle[] rectangles;
