@@ -43,15 +43,30 @@ public class CreateFormInTable {
      */
     @Test
     public void testCreateFormInTable() throws FileNotFoundException {
-        manipulatePdf(new File(RESULT_FOLDER, "TableLikeTobiasRettstadt.pdf").getAbsolutePath());
+        manipulatePdf(new File(RESULT_FOLDER, "TableLikeTobiasRettstadt.pdf").getAbsolutePath(), true);
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/47594075/itext-7-0-5-forms-nullpointerexception-when-adding-a-lot-of-tables-with-form">
+     * iText 7.0.5 - Forms - NullPointerException when adding a lot of tables with form fields
+     * </a>
+     * <p>
+     * Switching off immediate flushing prevents the exception but the result is
+     * not as expected by the OP: the table is spread over 4 pages but all form
+     * fields are added to the last page.
+     * </p>
+     */
+    @Test
+    public void testCreateFormInTableNoFlush() throws FileNotFoundException {
+        manipulatePdf(new File(RESULT_FOLDER, "TableLikeTobiasRettstadtNoFlush.pdf").getAbsolutePath(), false);
     }
 
     /**
      * @see #testCreateFormInTable()
      */
-    protected void manipulatePdf(String dest) throws FileNotFoundException  {
+    protected void manipulatePdf(String dest, boolean immediateFlush) throws FileNotFoundException  {
         PdfDocument pdfDoc = new PdfDocument(new PdfWriter(dest));
-        Document doc = new Document(pdfDoc);
+        Document doc = new Document(pdfDoc, pdfDoc.getDefaultPageSize(), immediateFlush);
  
         for (int i = 0; i < 50; i++) {
             System.out.println(i);
@@ -96,15 +111,32 @@ public class CreateFormInTable {
      */
     @Test
     public void testCreateFormInTableVariant() throws FileNotFoundException {
-        manipulatePdfVariant(new File(RESULT_FOLDER, "TableLikeTobiasRettstadtVariant.pdf").getAbsolutePath());
+        manipulatePdfVariant(new File(RESULT_FOLDER, "TableLikeTobiasRettstadtVariant.pdf").getAbsolutePath(), true);
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/47594075/itext-7-0-5-forms-nullpointerexception-when-adding-a-lot-of-tables-with-form">
+     * iText 7.0.5 - Forms - NullPointerException when adding a lot of tables with form fields
+     * </a>
+     * <p>
+     * The simpler variant to reproduce the issue executed in the test method
+     * {@link #testCreateFormInTableVariant()} can be prevented from throwing
+     * an exception by not using immediate flush. In this case the result even
+     * looks as expected (in contrast to the result of the no-immediate-flush
+     * version of the original code, {@link #testCreateFormInTableNoFlush()}).
+     * </p>
+     */
+    @Test
+    public void testCreateFormInTableVariantNoFlush() throws FileNotFoundException {
+        manipulatePdfVariant(new File(RESULT_FOLDER, "TableLikeTobiasRettstadtVariantNoFlush.pdf").getAbsolutePath(), false);
     }
 
     /**
      * @see #testCreateFormInTableVariant()
      */
-    protected void manipulatePdfVariant(String dest) throws FileNotFoundException  {
+    protected void manipulatePdfVariant(String dest, boolean immediateFlush) throws FileNotFoundException  {
         PdfDocument pdfDoc = new PdfDocument(new PdfWriter(dest));
-        Document doc = new Document(pdfDoc);
+        Document doc = new Document(pdfDoc, pdfDoc.getDefaultPageSize(), immediateFlush);
         doc.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
         doc.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
  
