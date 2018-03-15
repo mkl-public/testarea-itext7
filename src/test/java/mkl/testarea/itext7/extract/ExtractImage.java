@@ -85,4 +85,59 @@ public class ExtractImage
             }
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/49262316/itext-7-throwing-inlineimageparseexception-in-the-first-pdf-page-while-in-itext">
+     * iText 7 throwing InlineImageParseException in the first PDF page while in iText 5 it works perfectly
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/16P-__xlugJoVK8QUifNzfMfaZp9DIMK9/view?usp=sharing">
+     * test.pdf
+     * </a> as testGustavoPiucco.pdf
+     * <p>
+     * Cannot reproduce the issue here. But apparently the RLE decoder still is broken,
+     * the output images at least are and the inline images use RLE.
+     * </p>
+     */
+    @Test
+    public void testExtractFromTestGustavoPiucco() throws IOException
+    {
+        try  (InputStream resourceStream = getClass().getResourceAsStream("testGustavoPiucco.pdf") )
+        {
+            PdfReader reader = new PdfReader(resourceStream);
+            PdfDocument document = new PdfDocument(reader);
+            PdfDocumentContentParser contentParser = new PdfDocumentContentParser(document);
+            for (int page = 1; page <= document.getNumberOfPages(); page++)
+            {
+                contentParser.processContent(page, new IEventListener()
+                {
+                    @Override
+                    public Set<EventType> getSupportedEvents()
+                    {
+                        return Collections.singleton(RENDER_IMAGE);
+                    }
+                    
+                    @Override
+                    public void eventOccurred(IEventData data, EventType type)
+                    {
+                        if (data instanceof ImageRenderInfo)
+                        {
+                            ImageRenderInfo imageRenderInfo = (ImageRenderInfo) data;
+                            byte[] bytes = imageRenderInfo.getImage().getImageBytes();
+                            try
+                            {
+                                Files.write(new File(RESULT_FOLDER, "testGustavoPiucco-" + index++ + ".img").toPath(), bytes);
+                            }
+                            catch (IOException e)
+                            {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    
+                    int index = 0;
+                });
+            }
+        }
+    }
 }
