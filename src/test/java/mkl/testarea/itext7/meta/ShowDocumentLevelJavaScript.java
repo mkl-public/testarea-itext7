@@ -57,4 +57,49 @@ public class ShowDocumentLevelJavaScript {
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/48445694/itext7-equivalent-method-for-getjavascript-in-pdfreader-class-in-itext7">
+     * itext7 - equivalent method for getJavascript in pdfReader class in itext7
+     * </a>
+     * <p>
+     * REJECT_ContainsJavaScript.pdf
+     * </p>
+     * <p>
+     * This test shows how to export all document level JavaScript. It
+     * essentially does the same as the iText 5 <code>PdfReader</code>
+     * method <code>getJavaScript</code>.
+     * </p>
+     * <p>
+     * The PDF file "REJECT_ContainsJavaScript.pdf" is the one the OP
+     * said he had trouble extracting JavaScript with. Cannot reproduce
+     * any issue here.
+     * </p>
+     */
+    @Test
+    public void testREJECT_ContainsJavaScript() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("REJECT_ContainsJavaScript.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfDocument pdfDocument = new PdfDocument(pdfReader)) {
+            PdfNameTree javascript = pdfDocument.getCatalog().getNameTree(PdfName.JavaScript);
+            Map<String, PdfObject> objs2 = javascript.getNames();
+            for (Map.Entry<String, PdfObject> entry : objs2.entrySet())
+            {
+                System.out.println();
+                System.out.println(entry.getKey());
+                System.out.println();
+
+                PdfObject object = entry.getValue();
+                if (object.isDictionary()) {
+                    object = ((PdfDictionary)object).get(PdfName.JS);
+                    if (object.isString()) {
+                        System.out.println(((PdfString)object).getValue());
+                    } else if (object.isStream()) {
+                        System.out.println(new String(((PdfStream)object).getBytes()));
+                    }
+                }
+                
+                System.out.println();
+            }
+        }
+    }
 }
