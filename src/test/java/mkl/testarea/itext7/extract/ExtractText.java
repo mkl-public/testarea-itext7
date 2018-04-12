@@ -53,4 +53,71 @@ public class ExtractText
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/49781516/itext-coordinate-outside-allowed-range-exception-using-locationtextlocationstr">
+     * iText “Coordinate outside allowed range” exception using LocationTextLocationStrategy
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1m4X8HTrR1Ssh7XtiTbARnI_-3s5FalrX/view?usp=sharing">
+     * 1.pdf
+     * </a> as GustavoPiucco-1.pdf
+     * <p>
+     * Indeed, the exception can be reproduced here but not for the other file,
+     * cf. {@link #testExtractGustavoPiucco2()}.
+     * </p>
+     * <p>
+     * The cause are clip path rectangles 79026 default user units in height.
+     * </p>
+     */
+    @Test
+    public void testExtractGustavoPiucco1() throws IOException
+    {
+        try (   InputStream resourceStream = getClass().getResourceAsStream("GustavoPiucco-1.pdf");
+                PdfReader reader = new PdfReader(resourceStream);
+                PdfDocument document = new PdfDocument(reader)  )
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int pageNum = 1; pageNum <= document.getNumberOfPages(); pageNum++)
+            {
+                PdfPage page = document.getPage(pageNum);
+                sb.append(PdfTextExtractor.getTextFromPage(page, new LocationTextExtractionStrategy()));
+            }
+
+            System.out.printf("\nText from GustavoPiucco-1.pdf\n=====\n%s\n=====", sb);
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/49781516/itext-coordinate-outside-allowed-range-exception-using-locationtextlocationstr">
+     * iText “Coordinate outside allowed range” exception using LocationTextLocationStrategy
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1S1KFaEijsSLQe7RyZDfq_fegfUtploST/view?usp=sharing">
+     * 2.pdf
+     * </a> as GustavoPiucco-2.pdf
+     * <p>
+     * Indeed, the exception cannot be reproduced here but it can for the other file,
+     * cf. {@link #testExtractGustavoPiucco1()}.
+     * </p>
+     * <p>
+     * Here the corresponding clip path rectangles are "only" 33628 default user units in height.
+     * </p>
+     */
+    @Test
+    public void testExtractGustavoPiucco2() throws IOException
+    {
+        try (   InputStream resourceStream = getClass().getResourceAsStream("GustavoPiucco-2.pdf");
+                PdfReader reader = new PdfReader(resourceStream);
+                PdfDocument document = new PdfDocument(reader)  )
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int pageNum = 1; pageNum <= document.getNumberOfPages(); pageNum++)
+            {
+                PdfPage page = document.getPage(pageNum);
+                sb.append(PdfTextExtractor.getTextFromPage(page, new LocationTextExtractionStrategy()));
+            }
+
+            System.out.printf("\nText from GustavoPiucco-2.pdf\n=====\n%s\n=====", sb);
+        }
+    }
 }
