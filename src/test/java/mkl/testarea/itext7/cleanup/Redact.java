@@ -16,7 +16,6 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.licensekey.LicenseKey;
 import com.itextpdf.pdfcleanup.PdfCleanUpLocation;
 import com.itextpdf.pdfcleanup.PdfCleanUpProcessor;
 import com.itextpdf.pdfcleanup.PdfCleanUpTool;
@@ -52,8 +51,6 @@ public class Redact
     @Test
     public void testRedactLikeDevAvitesh() throws IOException
     {
-        LicenseKey.loadLicenseFile("itextkey-multiple-products.xml");
-
         try (   InputStream resource = getClass().getResourceAsStream("edited_120192824_5 (1).pdf");
                 PdfReader reader = new PdfReader(resource);
                 OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "edited_120192824_5 (1)-redacted.pdf"));
@@ -121,8 +118,6 @@ public class Redact
     @Test
     public void testRedactLikeTieco() throws IOException
     {
-        LicenseKey.loadLicenseFile("itextkey-multiple-products.xml");
-
         try (   InputStream resource = getClass().getResourceAsStream("before.pdf");
                 PdfReader reader = new PdfReader(resource);
                 OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "before-redacted.pdf"));
@@ -131,6 +126,36 @@ public class Redact
         {
             List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
             cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(0f, 0f, 595f, 680f)));
+
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
+            cleaner.cleanUp();
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/38240692/error-in-redaction-with-itext-5-the-color-depth-1-is-not-supported-exception">
+     * Error in redaction with iText 5: “The color depth 1 is not supported.” exception when apply redaction on pdf which contain image also
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/0B42NqA5UnXMVbkhQQk9tR2hpSUE/view?pref=2&pli=1">
+     * Pages from Miscellaneous_corrupt.pdf
+     * </a>
+     * <p>
+     * While in iText 5 meanwhile a work-around for this issue has been added,
+     * pdfSweep still fails in 2.0.2-SNAPSHOT. Is an actual fix being worked on?
+     * </p>
+     */
+    @Test
+    public void testRedactPagesfromMiscellaneous_corrupt() throws IOException
+    {
+        try (   InputStream resource = getClass().getResourceAsStream("Pages from Miscellaneous_corrupt.pdf" );
+                PdfReader reader = new PdfReader(resource);
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "Pages from Miscellaneous_corrupt-redacted.pdf"));
+                PdfWriter writer = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(reader, writer)   )
+        {
+            List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
+            cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(190, 320, 430, 665)));
 
             PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
             cleaner.cleanUp();
