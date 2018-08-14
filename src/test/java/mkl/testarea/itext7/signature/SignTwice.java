@@ -36,8 +36,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.signatures.ExternalBlankSignatureContainer;
 import com.itextpdf.signatures.IExternalSignatureContainer;
 import com.itextpdf.signatures.PdfSigner;
 
@@ -134,7 +139,12 @@ public class SignTwice {
         }
     }
 
-
+    /**
+     * @see #testSignTwiceLikeJDNew()
+     * @see #testSignTwiceLikeJDNewFirstRevision()
+     * @see #testSignTwiceLikeJDNewFixedFile()
+     * @see #signP7DetachData(InputStream)
+     */
     public void SignMultPDF(byte[] pdfFile , String destPath , String name , String fname , String value) {
         IExternalSignatureContainer externalP7DetachSignatureContainer = new IExternalSignatureContainer() {
             @Override
@@ -180,6 +190,12 @@ public class SignTwice {
         }
     }
 
+    /**
+     * @see #testSignTwiceLikeJDNew()
+     * @see #testSignTwiceLikeJDNewFirstRevision()
+     * @see #testSignTwiceLikeJDNewFixedFile()
+     * @see #SignMultPDF(byte[], String, String, String, String)
+     */
     byte[] signP7DetachData(final InputStream data) throws GeneralSecurityException, IOException, CMSException, OperatorCreationException
     {
         String path = "keystores/demo-rsa2048.p12";
@@ -228,5 +244,54 @@ public class SignTwice {
         };
         CMSSignedData signeddata = generator.generate(cmsdata, false);
         return signeddata.getEncoded();
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/51812973/multiple-signature-not-working">
+     * Multiple signature not working
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/open?id=1dOZT_VGnqVe1II_DIiISGcD81be5V6i6">
+     * signed.pdf
+     * </a>
+     * <p>
+     * Indeed The OP's code results in warnings that annotations have been modified.
+     * Further analysis shows that the annotation indeed have been changed, <b>P</b>
+     * entries have been added to their dictionaries, references to the page they're
+     * on. 
+     * </p>
+     * @see #testStampSigned()
+     */
+    @Test
+    public void testSignSignedAgain() throws IOException, GeneralSecurityException {
+        try (   InputStream resource = getClass().getResourceAsStream("signed.pdf");
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "signed-again.pdf"))) {
+            PdfSigner pdfSigner = new PdfSigner(new PdfReader(resource), result, new StampingProperties().useAppendMode());
+            IExternalSignatureContainer external = new ExternalBlankSignatureContainer(PdfName.Adobe_PPKLite, PdfName.Adbe_pkcs7_detached);
+            pdfSigner.signExternalContainer(external, 8192);
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/51812973/multiple-signature-not-working">
+     * Multiple signature not working
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/open?id=1dOZT_VGnqVe1II_DIiISGcD81be5V6i6">
+     * signed.pdf
+     * </a>
+     * <p>
+     * This test reduces the issue analyzed in {@link #testSignSignedAgain()} to the
+     * inner cause: {@link PdfPage#getAnnotations()} as a side effect adds <b>P</b>
+     * entries to the annotation dictionaries, references to the page they're on,
+     * and marks them as changed.
+     * </p>
+     */
+    @Test
+    public void testStampSigned() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("signed.pdf");
+                PdfDocument pdfDocument = new PdfDocument(new PdfReader(resource), new PdfWriter(new File(RESULT_FOLDER, "signed-stamped.pdf")), new StampingProperties().useAppendMode())) {
+            pdfDocument.getPage(1).getAnnotations();
+        }
     }
 }
