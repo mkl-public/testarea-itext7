@@ -69,7 +69,7 @@ public class EnableLtv
         try (   InputStream resource = getClass().getResourceAsStream("BLANK-signed.pdf");
                 OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "BLANK-signed-enabled.pdf")))
         {
-            addLtvNoTS(resource, result, new OcspClientBouncyCastle(null), new CrlClientOnline("http://crl.d-trust.net/crl/d-trust_qualified_ca_3_2014.crl"), LtvVerification.Level.CRL, LtvVerification.Level.CRL);
+            addLtvNoTS(resource, result, new OcspClientBouncyCastle(null), new CrlClientOnline("http://crl.d-trust.net/crl/d-trust_qualified_ca_3_2014.crl"), LtvVerification.Level.OCSP_CRL, LtvVerification.Level.OCSP_CRL);
         }
     }
 
@@ -106,10 +106,10 @@ public class EnableLtv
             {
                 v.addVerification(name, ocsp, crl, LtvVerification.CertificateOption.WHOLE_CHAIN,
                         signatureLevel, LtvVerification.CertificateInclusion.YES);
-                v.merge();
             }
         }
 
+        v.merge();
         pdfDoc.close();
     }
 }
