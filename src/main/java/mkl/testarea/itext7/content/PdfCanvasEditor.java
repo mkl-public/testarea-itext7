@@ -69,6 +69,20 @@ public class PdfCanvasEditor extends PdfCanvasProcessor
 
     /**
      * <p>
+     * This method retrieves the next operation before its original {@link IContentOperator}
+     * is called. The default does nothing.
+     * </p>
+     * <p>
+     * Override this method to retrieve state information from before the
+     * operation execution.
+     * </p> 
+     */
+    protected void nextOperation(PdfLiteral operator, List<PdfObject> operands) {
+        
+    }
+
+    /**
+     * <p>
      * This method writes content stream operations to the target canvas. The default
      * implementation writes them as they come, so it essentially generates identical
      * copies of the original instructions the {@link ContentOperatorWrapper} instances
@@ -136,6 +150,7 @@ public class PdfCanvasEditor extends PdfCanvasProcessor
         @Override
         public void invoke(PdfCanvasProcessor processor, PdfLiteral operator, List<PdfObject> operands)
         {
+            nextOperation(operator, operands);
             if (originalOperator != null && !"Do".equals(operator.toString()))
             {
                 originalOperator.invoke(processor, operator, operands);
