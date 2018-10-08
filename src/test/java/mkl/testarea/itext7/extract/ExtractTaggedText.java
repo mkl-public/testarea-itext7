@@ -1,7 +1,5 @@
 package mkl.testarea.itext7.extract;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

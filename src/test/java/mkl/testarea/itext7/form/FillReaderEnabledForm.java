@@ -1,7 +1,5 @@
 package mkl.testarea.itext7.form;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

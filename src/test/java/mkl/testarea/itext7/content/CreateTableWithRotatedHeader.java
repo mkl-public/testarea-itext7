@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.itextpdf.io.font.otf.GlyphLine;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package mkl.testarea.itext7.html2pdf;
 
 import java.io.File;
@@ -12,18 +9,17 @@ import org.junit.Test;
 
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.html2pdf.css.media.MediaDeviceDescription;
-import com.itextpdf.html2pdf.css.media.MediaType;
-import com.itextpdf.html2pdf.css.util.CssUtils;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.font.FontProvider;
 import com.itextpdf.licensekey.LicenseKey;
+import com.itextpdf.styledxmlparser.css.media.MediaDeviceDescription;
+import com.itextpdf.styledxmlparser.css.media.MediaType;
+import com.itextpdf.styledxmlparser.css.util.CssUtils;
 
 /**
  * @author mklink
- *
  */
 public class Responsive
 {

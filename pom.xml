@@ -26,8 +26,8 @@
 	<properties>
 		<junit.version>4.7</junit.version>
 		<itextpdf.version>${project.version}</itextpdf.version>
-		<cleanup.version>2.0.2-SNAPSHOT</cleanup.version>
-		<html2pdf.version>2.0.3-SNAPSHOT</html2pdf.version>
+		<cleanup.version>2.0.3-SNAPSHOT</cleanup.version>
+		<html2pdf.version>2.1.1-SNAPSHOT</html2pdf.version>
 		<bouncycastle.version>1.49</bouncycastle.version>
 	</properties>
 	<dependencies>
