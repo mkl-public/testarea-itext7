@@ -254,4 +254,43 @@ public class CreateTable
         }
         return null;
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/53449312/itext-divide-cell-horizontal">
+     * iText divide cell horizontal
+     * </a>
+     * <p>
+     * This test shows how to construct a table as desired by the OP.
+     * </p>
+     */
+    @Test
+    public void testCreateTableForDennis() throws IOException {
+        try (   OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "tableForDennis.pdf"));
+                PdfWriter writer = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(writer);
+                Document doc = new Document(pdfDocument)   )
+        {
+            Table table = new Table(new float[] {30, 30, 30, 30, 30, 30, 30, 30, 30});
+
+            for (int i = 0; i < 4; i++) {
+                table.addCell(new Cell(2, 1).add(new Paragraph("Text")));
+                table.addCell(new Cell(2, 1).add(new Paragraph("Text")));
+                table.addCell(new Cell().setHeight(15));
+                table.addCell(new Cell(2, 1).add(new Paragraph("Text")));
+                table.addCell(new Cell().setHeight(15));
+                table.addCell(new Cell(2, 1).add(new Paragraph("Text")));
+                table.addCell(new Cell().setHeight(15));
+                table.addCell(new Cell(2, 1).add(new Paragraph("Text")));
+                table.addCell(new Cell().setHeight(15));
+                
+                table.addCell(new Cell().setHeight(15));
+                table.addCell(new Cell().setHeight(15));
+                table.addCell(new Cell().setHeight(15));
+                table.addCell(new Cell().setHeight(15));
+            }
+
+            doc.add(table);
+            doc.close();
+        }
+    }
 }
