@@ -498,4 +498,39 @@ public class SetButtonImage {
             characteristics.put(PdfName.TP, new PdfNumber(1));
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/54107835/itext-7-set-image-to-button-that-appears-multiple-times">
+     * iText 7 : Set image to button that appears multiple times
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1k1hctPecvwMQ-2eX1ieoRDEP5ktBrYWb/view?usp=sharing">
+     * itext_multiple_images.pdf
+     * </a>
+     * <p>
+     * Indeed, setting the image of a multi-widget pushbutton field fails.
+     * Furthermore, version 7.1.4 used to throw an exception during form
+     * flattening which already is fixed in the 7.1.5-SNAPSHOT as of now.
+     * </p>
+     * <p>
+     * The cause of the error is the lacking support for form fields with
+     * multiple widgets of {@link PdfFormField#regenerateField()}.
+     * </p>
+     */
+    @Test
+    public void testSetImageToButtonWithManyVisualizations() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("itext_multiple_images.pdf");
+                PdfReader reader = new PdfReader(resource);
+                OutputStream outputStream = new FileOutputStream(new File(RESULT_FOLDER, "itext_multiple_images-with-image.pdf"));) {
+            PdfDocument pdfDocument = new PdfDocument(reader, new PdfWriter(outputStream));
+            PdfAcroForm acroForm = PdfAcroForm.getAcroForm(pdfDocument, false);
+
+            PdfButtonFormField button = (PdfButtonFormField) acroForm.getField("image");
+            button.setImage("src\\test\\resources\\mkl\\testarea\\itext7\\form\\2x2colored.png");
+
+            acroForm.flattenFields();
+
+            pdfDocument.close();
+        }
+    }
 }
