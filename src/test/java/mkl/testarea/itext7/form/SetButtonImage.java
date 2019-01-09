@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.annot.PdfWidgetAnnotation;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 
@@ -527,6 +529,48 @@ public class SetButtonImage {
 
             PdfButtonFormField button = (PdfButtonFormField) acroForm.getField("image");
             button.setImage("src\\test\\resources\\mkl\\testarea\\itext7\\form\\2x2colored.png");
+
+            acroForm.flattenFields();
+
+            pdfDocument.close();
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/54107835/itext-7-set-image-to-button-that-appears-multiple-times">
+     * iText 7 : Set image to button that appears multiple times
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1k1hctPecvwMQ-2eX1ieoRDEP5ktBrYWb/view?usp=sharing">
+     * itext_multiple_images.pdf
+     * </a>
+     * <p>
+     * This is a work-around for the effectively misbehaving setImage
+     * call in {@link #testSetImageToButtonWithManyVisualizations()};
+     * it is replaced by code iterating over the widgets and adds the
+     * image as normal appearance to each of them. 
+     * </p>
+     */
+    @Test
+    public void testSetImageToButtonWithManyVisualizationsWorkAround() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("itext_multiple_images.pdf");
+                PdfReader reader = new PdfReader(resource);
+                OutputStream outputStream = new FileOutputStream(new File(RESULT_FOLDER, "itext_multiple_images-with-image-workaround.pdf"));) {
+            PdfDocument pdfDocument = new PdfDocument(reader, new PdfWriter(outputStream));
+            PdfAcroForm acroForm = PdfAcroForm.getAcroForm(pdfDocument, false);
+
+            PdfButtonFormField button = (PdfButtonFormField) acroForm.getField("image");
+
+            ImageData img = ImageDataFactory.create("src\\test\\resources\\mkl\\testarea\\itext7\\form\\2x2colored.png");
+            PdfImageXObject imgXObj = new PdfImageXObject(img);
+            List<PdfWidgetAnnotation> widgets = button.getWidgets();
+            for (PdfWidgetAnnotation widget : widgets) {
+                Rectangle rectangle = widget.getRectangle().toRectangle();
+                PdfFormXObject xObject = new PdfFormXObject(rectangle);
+                PdfCanvas canvas = new PdfCanvas(xObject, pdfDocument);
+                canvas.addXObject(imgXObj, rectangle.getWidth(), 0, 0, rectangle.getHeight(), rectangle.getLeft(), rectangle.getBottom());
+                widget.setNormalAppearance(xObject.getPdfObject());
+            }
 
             acroForm.flattenFields();
 
