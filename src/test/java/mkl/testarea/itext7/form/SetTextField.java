@@ -11,6 +11,10 @@ import org.junit.Test;
 
 import com.itextpdf.forms.PdfAcroForm;
 import com.itextpdf.forms.fields.PdfFormField;
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.util.StreamUtil;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -37,6 +41,7 @@ public class SetTextField {
      * </a>
      * <p>
      * Cannot reproduce the issue, neither with 7.1.4 nor 7.1.5-SNAPSHOT.
+     * But see {@link #testSetFontAndTextToFieldWithManyVisualizations()}.
      * </p>
      */
     @Test
@@ -56,4 +61,81 @@ public class SetTextField {
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/54116803/itext-7-set-text-field-once-even-if-it-exists-multiple-times-with-the-same-nam">
+     * iText 7 : Set text field once even if it exists multiple times with the same name
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/16IgO74D4zwbSpO0Di0PympYZhYYPDUz9/view?usp=sharing">
+     * itext_multiple_text.pdf
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1Tqx1ihUkll542ZzfurGqRMse3lCc9X10/view?usp=sharing">
+     * Arimo-Regular.ttf
+     * </a>
+     * <p>
+     * Using the <code>setValue</code> overload with additional font font size
+     * parameters one can reproduce the issue. Actually only the overload with
+     * only a single parameter used in {@link #testSetTextToFieldWithManyVisualizations()}
+     * takes multiple widgets into account.
+     * </p>
+     */
+    @Test
+    public void testSetFontAndTextToFieldWithManyVisualizations() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("itext_multiple_text.pdf");
+                InputStream fontResource = getClass().getResourceAsStream("Arimo-Regular.ttf");
+                PdfReader reader = new PdfReader(resource);
+                OutputStream outputStream = new FileOutputStream(new File(RESULT_FOLDER, "itext_multiple_text-with-font-and-text.pdf"));) {
+            PdfDocument pdfDocument = new PdfDocument(reader, new PdfWriter(outputStream));
+            PdfAcroForm acroForm = PdfAcroForm.getAcroForm(pdfDocument, false);
+
+            PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(fontResource), PdfEncodings.IDENTITY_H);
+            PdfFormField textField = acroForm.getField("test");
+            textField.setValue("שלום", font, 11.0f);
+
+            acroForm.flattenFields();
+
+            pdfDocument.close();
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/54116803/itext-7-set-text-field-once-even-if-it-exists-multiple-times-with-the-same-nam">
+     * iText 7 : Set text field once even if it exists multiple times with the same name
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/16IgO74D4zwbSpO0Di0PympYZhYYPDUz9/view?usp=sharing">
+     * itext_multiple_text.pdf
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1Tqx1ihUkll542ZzfurGqRMse3lCc9X10/view?usp=sharing">
+     * Arimo-Regular.ttf
+     * </a>
+     * <p>
+     * A work-around for the issue in {@link #testSetFontAndTextToFieldWithManyVisualizations()}
+     * - by setting font and font size as the text field properties
+     * one can again use the single parameter <code>setValue</code>
+     * overload. Apparently, though, the character order is inverted.
+     * </p>
+     */
+    @Test
+    public void testSetFontAndTextToFieldWithManyVisualizationsWorkAround() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("itext_multiple_text.pdf");
+                InputStream fontResource = getClass().getResourceAsStream("Arimo-Regular.ttf");
+                PdfReader reader = new PdfReader(resource);
+                OutputStream outputStream = new FileOutputStream(new File(RESULT_FOLDER, "itext_multiple_text-with-font-and-text-workaround.pdf"));) {
+            PdfDocument pdfDocument = new PdfDocument(reader, new PdfWriter(outputStream));
+            PdfAcroForm acroForm = PdfAcroForm.getAcroForm(pdfDocument, false);
+
+            PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(fontResource), PdfEncodings.IDENTITY_H);
+            PdfFormField textField = acroForm.getField("test");
+            textField.setFont(font);
+            textField.setFontSize(11f);
+            textField.setValue("שלום");
+
+            acroForm.flattenFields();
+
+            pdfDocument.close();
+        }
+    }
 }
