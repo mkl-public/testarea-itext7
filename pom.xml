@@ -7,7 +7,7 @@
 	<artifactId>testarea-itext7</artifactId>
 	<packaging>jar</packaging>
 	<name>Test area for iText v7</name>
-	<version>7.1.5-SNAPSHOT</version>
+	<version>7.1.5</version>
 
 	<build>
 		<plugins>
@@ -26,8 +26,9 @@
 	<properties>
 		<junit.version>4.7</junit.version>
 		<itextpdf.version>${project.version}</itextpdf.version>
-		<cleanup.version>2.0.3-SNAPSHOT</cleanup.version>
-		<html2pdf.version>2.1.1-SNAPSHOT</html2pdf.version>
+		<cleanup.version>2.0.3</cleanup.version>
+		<html2pdf.version>2.1.2</html2pdf.version>
+		<licensekey.version>3.0.4</licensekey.version>
 		<bouncycastle.version>1.49</bouncycastle.version>
 	</properties>
 	<dependencies>
@@ -49,7 +50,7 @@
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>font-asian</artifactId>
-			<version>7.1.2</version>
+			<version>${itextpdf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
@@ -69,7 +70,7 @@
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itext-licensekey</artifactId>
-			<version>3.0.3-SNAPSHOT</version>
+			<version>${licensekey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
