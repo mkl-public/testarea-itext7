@@ -1,21 +1,32 @@
 package mkl.testarea.itext7.cleanup;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.io.util.StreamUtil;
 import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.layout.Canvas;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.pdfcleanup.PdfCleanUpLocation;
 import com.itextpdf.pdfcleanup.PdfCleanUpProcessor;
 import com.itextpdf.pdfcleanup.PdfCleanUpTool;
@@ -161,4 +172,62 @@ public class Redact
             cleaner.cleanUp();
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/56186498/what-makes-pdfstamper-to-remove-images-from-pdf-after-cleanup-though-it-should">
+     * What makes PdfStamper to remove images from pdf after cleanup() though it shouldn't?
+     * </a>
+     * <p>
+     * This test was intended to check whether the iText 5 redaction issue
+     * with inline images (images completely outsides redaction areas are
+     * dropped). This turns out not to be an issue with itext 7, but
+     * other issues became apparent:
+     * </p>
+     * <ul>
+     * <li>test PDF creation results in invalid PDF: the inline image parameters
+     * contain an invalid direct colorspace; DEVSIX-2909
+     * <li>redaction of that PDF with invalid inline image replaces colorspace
+     * without adapting image bytes; DEVSIX-2911
+     * <li>test PDF created by parallel iText 5 fails during redaction, its
+     * (valid!) color space is rejected.
+     * </ul> 
+     */
+    @Test
+    public void testRedactPdfWithInlineImages() throws IOException
+    {
+        byte[] pdf = createPdfWithInlineImages();
+        Files.write(new File(RESULT_FOLDER, "pdfWithInlineImages.pdf").toPath(), pdf);
+
+        try (   PdfReader reader = new PdfReader(new ByteArrayInputStream(pdf));
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "pdfWithInlineImages-redacted.pdf"));
+                PdfWriter writer = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(reader, writer)   )
+        {
+            List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
+            cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(150, 150, 200, 200)));
+
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
+            cleaner.cleanUp();
+        }
+    }
+
+    byte[] createPdfWithInlineImages() throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        final ImageData image;
+        try (   InputStream imageResource = getClass().getResourceAsStream("/mkl/testarea/itext7/form/2x2colored.png")) {
+            image = ImageDataFactory.create(StreamUtil.inputStreamToArray(imageResource));
+        }
+
+        try (   PdfWriter writer = new PdfWriter(baos);
+                PdfDocument pdfDoc = new PdfDocument(writer);   ) {
+            PdfCanvas pdfCanvas = new PdfCanvas(pdfDoc.addNewPage(new PageSize(500, 500)));
+            for (int i = 0; i < 5; i++) {
+                pdfCanvas.addImage(image, 50, 0, 0, 50, i * 100 + 25, i * 100 + 25, true);
+            }
+        }
+
+        return baos.toByteArray();
+    }
+
 }
