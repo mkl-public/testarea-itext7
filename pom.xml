@@ -7,7 +7,7 @@
 	<artifactId>testarea-itext7</artifactId>
 	<packaging>jar</packaging>
 	<name>Test area for iText v7</name>
-	<version>7.1.7-SNAPSHOT</version>
+	<version>7.1.8-SNAPSHOT</version>
 
 	<build>
 		<plugins>
@@ -27,7 +27,7 @@
 		<junit.version>4.7</junit.version>
 		<itextpdf.version>${project.version}</itextpdf.version>
 		<cleanup.version>2.0.5-SNAPSHOT</cleanup.version>
-		<html2pdf.version>2.1.4-SNAPSHOT</html2pdf.version>
+		<html2pdf.version>2.1.5-SNAPSHOT</html2pdf.version>
 		<licensekey.version>3.0.5-SNAPSHOT</licensekey.version>
 		<bouncycastle.version>1.49</bouncycastle.version>
 	</properties>
@@ -104,6 +104,12 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>${bouncycastle.version}</version>
 			<type>jar</type>
+		</dependency>
+		<dependency>
+			<!-- jsoup HTML parser library @ https://jsoup.org/ -->
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.12.1</version>
 		</dependency>
 	</dependencies>
 </project>
