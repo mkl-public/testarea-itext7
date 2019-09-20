@@ -86,4 +86,131 @@ public class ChangeColor {
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/57993761/traverse-whole-pdf-and-change-blue-color-to-black-change-color-of-underlines-a">
+     * Traverse whole PDF and change blue color to black ( Change color of underlines as well) + iText
+     * </a>
+     * <br/>
+     * <a href="https://raad-dev-test.s3.ap-south-1.amazonaws.com/36/2019-08-30/Control_of_nitrosamine_impurities_in_sartans__rev.pdf">
+     * Control_of_nitrosamine_impurities_in_sartans__rev.pdf
+     * </a>
+     * <p>
+     * This canvas editor extends the editor in
+     * {@link #testChangeFillRgbBlueToBlack()}
+     * by not only replacing fill colors but
+     * also stroke colors.
+     * </p>
+     */
+    @Test
+    public void testChangeRgbBlueToBlackControlOfNitrosamineImpuritiesInSartansRev() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("Control_of_nitrosamine_impurities_in_sartans__rev.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "Control_of_nitrosamine_impurities_in_sartans__rev-FillRgbBlueToBlack.pdf"));
+                PdfWriter pdfWriter = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter) )
+        {
+            PdfCanvasEditor editor = new PdfCanvasEditor()
+            {
+                @Override
+                protected void write(PdfCanvasProcessor processor, PdfLiteral operator, List<PdfObject> operands)
+                {
+                    String operatorString = operator.toString();
+
+                    if (SET_FILL_RGB.equals(operatorString) && operands.size() == 4) {
+                        if (isApproximatelyEqual(operands.get(0), 0) &&
+                                isApproximatelyEqual(operands.get(1), 0) &&
+                                isApproximatelyEqual(operands.get(2), 1)) {
+                            super.write(processor, new PdfLiteral("g"), Arrays.asList(new PdfNumber(0), new PdfLiteral("g")));
+                            return;
+                        }
+                    }
+
+                    if (SET_STROKE_RGB.equals(operatorString) && operands.size() == 4) {
+                        if (isApproximatelyEqual(operands.get(0), 0) &&
+                                isApproximatelyEqual(operands.get(1), 0) &&
+                                isApproximatelyEqual(operands.get(2), 1)) {
+                            super.write(processor, new PdfLiteral("G"), Arrays.asList(new PdfNumber(0), new PdfLiteral("G")));
+                            return;
+                        }
+                    }
+
+                    super.write(processor, operator, operands);
+                }
+
+                boolean isApproximatelyEqual(PdfObject number, float reference) {
+                    return number instanceof PdfNumber && Math.abs(reference - ((PdfNumber)number).floatValue()) < 0.01f;
+                }
+
+                final String SET_FILL_RGB = "rg";
+                final String SET_STROKE_RGB = "RG";
+            };
+            for (int i = 1; i <= pdfDocument.getNumberOfPages(); i++)
+            {
+                editor.editPage(pdfDocument, i);
+            }
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/57993761/traverse-whole-pdf-and-change-blue-color-to-black-change-color-of-underlines-a">
+     * Traverse whole PDF and change blue color to black ( Change color of underlines as well) + iText
+     * </a>
+     * <br/>
+     * <a href="https://raad-dev-test.s3.ap-south-1.amazonaws.com/36/2019-08-30/EDQM_reports_issues_of_non-compliance_with_tooth__Mac.pdf">
+     * EDQM_reports_issues_of_non-compliance_with_tooth__Mac.pdf
+     * </a>
+     * <p>
+     * This canvas editor is the same as in
+     * {@link #testChangeRgbBlueToBlackControlOfNitrosamineImpuritiesInSartansRev()}.
+     * </p>
+     */
+    @Test
+    public void testChangeRgbBlueToBlackEdqmReportsIssuesOfNonComplianceWithToothMac() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("EDQM_reports_issues_of_non-compliance_with_tooth__Mac.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "EDQM_reports_issues_of_non-compliance_with_tooth__Mac-FillRgbBlueToBlack.pdf"));
+                PdfWriter pdfWriter = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter) )
+        {
+            PdfCanvasEditor editor = new PdfCanvasEditor()
+            {
+                @Override
+                protected void write(PdfCanvasProcessor processor, PdfLiteral operator, List<PdfObject> operands)
+                {
+                    String operatorString = operator.toString();
+
+                    if (SET_FILL_RGB.equals(operatorString) && operands.size() == 4) {
+                        if (isApproximatelyEqual(operands.get(0), 0) &&
+                                isApproximatelyEqual(operands.get(1), 0) &&
+                                isApproximatelyEqual(operands.get(2), 1)) {
+                            super.write(processor, new PdfLiteral("g"), Arrays.asList(new PdfNumber(0), new PdfLiteral("g")));
+                            return;
+                        }
+                    }
+
+                    if (SET_STROKE_RGB.equals(operatorString) && operands.size() == 4) {
+                        if (isApproximatelyEqual(operands.get(0), 0) &&
+                                isApproximatelyEqual(operands.get(1), 0) &&
+                                isApproximatelyEqual(operands.get(2), 1)) {
+                            super.write(processor, new PdfLiteral("G"), Arrays.asList(new PdfNumber(0), new PdfLiteral("G")));
+                            return;
+                        }
+                    }
+
+                    super.write(processor, operator, operands);
+                }
+
+                boolean isApproximatelyEqual(PdfObject number, float reference) {
+                    return number instanceof PdfNumber && Math.abs(reference - ((PdfNumber)number).floatValue()) < 0.01f;
+                }
+
+                final String SET_FILL_RGB = "rg";
+                final String SET_STROKE_RGB = "RG";
+            };
+            for (int i = 1; i <= pdfDocument.getNumberOfPages(); i++)
+            {
+                editor.editPage(pdfDocument, i);
+            }
+        }
+    }
 }
