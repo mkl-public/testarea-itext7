@@ -350,6 +350,38 @@ public class RemoveGraphicsByColor {
     }
 
     /**
+     * <a href="https://stackoverflow.com/questions/58029533/traverse-whole-pdf-and-remove-underlines-of-hyperlinks-annotations-only-itex">
+     * Traverse whole PDF and Remove underlines of hyperlinks (annotations) only + iText
+     * </a>
+     * <br/>
+     * <a href="https://raad-dev-test.s3.ap-south-1.amazonaws.com/raw/WebScraping/RegulatoryInformation/dev/North+America/USA/2019-10-31/2841/_FDA_Requires_Use_of_eCTD_Format_and_Standardized_Study_Data_in_Future_Regulatory_Submissions__Sept.pdf">
+     * _FDA_Requires_Use_of_eCTD_Format_and_Standardized_Study_Data_in_Future_Regulatory_Submissions__Sept.pdf
+     * </a>
+     * <p>
+     * This test uses the {@link PdfGraphicsRemoverByColorPredicate}
+     * to remove blue underlines from the given document. This content
+     * editor actually drops any path stroking or filling of a matched
+     * color. The OP reported that the red dotted line on page 1 did
+     * vanish. This cannot be reproduced like this.
+     * </p>
+     */
+    @Test
+    public void testRemoveAllBlueLinesFromFdaRequiresUseOfEctdFormatAndStandardizedStudyDataInFutureRegulatorySubmissionsSept() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("_FDA_Requires_Use_of_eCTD_Format_and_Standardized_Study_Data_in_Future_Regulatory_Submissions__Sept.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "_FDA_Requires_Use_of_eCTD_Format_and_Standardized_Study_Data_in_Future_Regulatory_Submissions__Sept-RemoveAllBlueLines.pdf"));
+                PdfWriter pdfWriter = new PdfWriter(result);
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter) )
+        {
+            PdfCanvasEditor editor = new PdfGraphicsRemoverByColorPredicate(RemoveGraphicsByColor::isRgbBlue);
+            for (int i = 1; i <= pdfDocument.getNumberOfPages(); i++)
+            {
+                editor.editPage(pdfDocument, i);
+            }
+        }
+    }
+
+    /**
      * This {@link Predicate} checks whether a color is of a RGB color
      * type and represents some blue.
      */
