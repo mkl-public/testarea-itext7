@@ -1,6 +1,3 @@
-/**
- * 
- */
 package mkl.testarea.itext7.content;
 
 import java.io.File;
@@ -15,12 +12,12 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.WriterProperties;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 
 /**
- * @author mklink
- *
+ * @author mkl
  */
 public class RotatePageXObject {
     final static File RESULT_FOLDER = new File("target/test-outputs", "content");
@@ -42,7 +39,7 @@ public class RotatePageXObject {
     public void testAddPage25Degree() throws IOException {
         try (   InputStream resource = getClass().getResourceAsStream("li.persia.pdf");
                 PdfDocument srcDoc = new PdfDocument(new PdfReader(resource));
-                PdfDocument pdfDoc = new PdfDocument(new PdfWriter(new File(RESULT_FOLDER, "li.persia-25Degree.pdf")))) {
+                PdfDocument pdfDoc = new PdfDocument(new PdfWriter(new File(RESULT_FOLDER, "li.persia-25Degree.pdf").getAbsolutePath(), new WriterProperties().setFullCompressionMode(true)))) {
             PdfCanvas content = new PdfCanvas(pdfDoc.addNewPage());
             PageSize pageSize = pdfDoc.getDefaultPageSize();
             PdfFormXObject page = srcDoc.getPage(1).copyAsFormXObject(pdfDoc);
