@@ -7,7 +7,7 @@
 	<artifactId>testarea-itext7</artifactId>
 	<packaging>jar</packaging>
 	<name>Test area for iText v7</name>
-	<version>7.1.10-SNAPSHOT</version>
+	<version>7.1.12-SNAPSHOT</version>
 
 	<build>
 		<plugins>
@@ -24,11 +24,11 @@
 	</build>
 
 	<properties>
-		<junit.version>4.7</junit.version>
+		<junit.version>4.12</junit.version>
 		<itextpdf.version>${project.version}</itextpdf.version>
-		<cleanup.version>2.0.5-SNAPSHOT</cleanup.version>
-		<html2pdf.version>2.1.7-SNAPSHOT</html2pdf.version>
-		<licensekey.version>3.0.5-SNAPSHOT</licensekey.version>
+		<cleanup.version>2.0.6-SNAPSHOT</cleanup.version>
+		<html2pdf.version>2.1.8-SNAPSHOT</html2pdf.version>
+		<licensekey.version>3.0.7-SNAPSHOT</licensekey.version>
 		<bouncycastle.version>1.64</bouncycastle.version>
 	</properties>
 	<dependencies>
@@ -81,6 +81,11 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>layout</artifactId>
 			<version>${itextpdf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>pdfrender</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.itextpdf</groupId>
