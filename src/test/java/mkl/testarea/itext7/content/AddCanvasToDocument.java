@@ -15,6 +15,7 @@ import com.itextpdf.io.util.StreamUtil;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
@@ -22,6 +23,7 @@ import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.property.TextAlignment;
 
 /**
  * @author mkl
@@ -80,7 +82,7 @@ public class AddCanvasToDocument {
         img.scaleToFit(effectivePageSize.getWidth(), effectivePageSize.getHeight());
         PdfFormXObject pdfFormXObject = new PdfFormXObject(new Rectangle(img.getImageScaledWidth(), img.getImageScaledHeight()));
         PdfCanvas pdfCanvas = new PdfCanvas(pdfFormXObject, pdfDoc);
-        try (Canvas canvas = new Canvas(pdfCanvas, pdfDoc, pdfFormXObject.getBBox().toRectangle())) {
+        try (Canvas canvas = new Canvas(pdfCanvas, pdfFormXObject.getBBox().toRectangle())) {
             canvas.add(img);
         }
 
@@ -96,4 +98,35 @@ public class AddCanvasToDocument {
         doc.close();
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/63055889/what-is-an-alternate-way-to-implement-pdfcontentbyte-and-pdftemplate-in-itext-7">
+     * What is an alternate way to implement PdfContentByte and PdfTemplate in iText 7
+     * </a>
+     * <p>
+     * This test shows how to add text to a form xobject and how to
+     * add that form xobject to a page.
+     * </p>
+     */
+    @Test
+    public void testAddCanvasForManjushaDC() throws IOException {
+        String value = "Hello!";
+        float width = 100;
+        float height = 20;
+        float linePos = 2;
+        float left = 200;
+        float bottom = 700;
+
+        File DEST = new File(RESULT_FOLDER, "AddCanvasForManjushaDC.pdf");
+
+        try (   PdfDocument pdfDoc = new PdfDocument(new PdfWriter(DEST))   ) {
+            PdfFormXObject pdfFormXObject = new PdfFormXObject(new Rectangle(width, height));
+            try (Canvas canvas = new Canvas(pdfFormXObject, pdfDoc)) {
+                canvas.showTextAligned(value, width/2, linePos, TextAlignment.CENTER);
+            }
+
+            PdfPage page = pdfDoc.addNewPage();
+            PdfCanvas pdfCanvas = new PdfCanvas(page);
+            pdfCanvas.addXObject(pdfFormXObject, left, bottom);
+        }
+    }
 }
