@@ -146,7 +146,7 @@ public class AddToPortfolioFolder {
                 folderDictionary = new PdfDictionary();
                 folderDictionary.put(PdfName.ID, new PdfNumber(0));
                 folderDictionary.put(PdfName.Name, new PdfString(folderName));
-                folderDictionary.put(FREE, new PdfArray(new int[] {0, Integer.MAX_VALUE}));
+                folderDictionary.put(FREE, new PdfArray(new int[] {1, Integer.MAX_VALUE}));
                 pdfCollection.getPdfObject().put(FOLDERS, folderDictionary.makeIndirect(pdfDocument));
                 folders.put(folder, 0);
             }
