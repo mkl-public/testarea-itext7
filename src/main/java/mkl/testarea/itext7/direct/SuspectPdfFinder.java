@@ -4,12 +4,18 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
 import com.itextpdf.kernel.pdf.ReaderProperties;
+
+import mkl.testarea.itext7.extract.FieldValues;
+import mkl.testarea.itext7.extract.WidgetAnalyzer;
 
 /**
  * This tool checks PDFs for the presence of multiple indirect objects
@@ -42,9 +48,10 @@ public class SuspectPdfFinder {
     }
 
     void check(String file) {
-        try (ObjectStructureAnalyzer analyzer = new ObjectStructureAnalyzer(new RandomAccessSourceFactory().createBestSource(file), new ReaderProperties())) {
-            Multimap<Integer, Integer> suspicions = MultimapBuilder.treeKeys().treeSetValues().build();
-            Multimap<Integer, ExtPdfIndirectReference> references = analyzer.findIndirectObjects();
+        try (   ObjectStructureAnalyzer objectAnalyzer = new ObjectStructureAnalyzer(new RandomAccessSourceFactory().createBestSource(file), new ReaderProperties());
+                WidgetAnalyzer widgetAnalyzer = new WidgetAnalyzer(new RandomAccessSourceFactory().createBestSource(file), new ReaderProperties())  ) {
+            Multimap<Integer, Integer> suspiciousObjects = MultimapBuilder.treeKeys().treeSetValues().build();
+            Multimap<Integer, ExtPdfIndirectReference> references = objectAnalyzer.findIndirectObjects();
             for (Integer num : references.keySet()) {
                 Collection<ExtPdfIndirectReference> theseReferences = references.get(num);
                 if (theseReferences.size() > 1) {
@@ -53,46 +60,96 @@ public class SuspectPdfFinder {
                     int prevRevision = -1;
                     for (int rev : revs) {
                         if (prevRevision == rev) {
-                            suspicions.put(rev, num);
+                            suspiciousObjects.put(rev, num);
                         }
                         prevRevision = rev;
                     }
                 }
             }
-            if (!suspicions.isEmpty()) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("\n\"")
-                             .append(file)
-                             .append("\" has ")
-                             .append(suspicions.keySet().size())
-                             .append(" revision(s) with multiple objects with the same object number:\n");
-                int revCount = 0;
-                for (int revision : suspicions.keySet()) {
-                    stringBuilder.append(" * ");
-                    if (++revCount > maxRevisions) {
-                        stringBuilder.append("...\n");
-                        break;
-                    }
-                    stringBuilder.append("Revision ")
-                                 .append(revision)
-                                 .append(" contains multiple object for the object numbers");
-                    int objNumberCount = 0;
-                    for (int objNumber : suspicions.get(revision)) {
-                        stringBuilder.append(objNumberCount > 0 ? ", " : " ");
-                        if (++objNumberCount > maxObjNumbersPerRevision) {
-                            stringBuilder.append("...\n");
-                            break;
-                        }
-                        stringBuilder.append(objNumber);
-                    }
-                    stringBuilder.append('\n');
-                }
 
+            Map<String, FieldValues<String>> suspiciousFields = new TreeMap<String, FieldValues<String>>();
+            Map<String, FieldValues<String>> fieldValues = widgetAnalyzer.findFieldValues();
+            for (Map.Entry<String, FieldValues<String>> entry : fieldValues.entrySet()) {
+                FieldValues<String> values = entry.getValue();
+                Set<String> widgetValues = values.getWidgetValues();
+                if (widgetValues.size() > 1 || (widgetValues.size() == 1 && !values.getActualValue().equals(widgetValues.iterator().next())))
+                    suspiciousFields.put(entry.getKey(), values);
+            }
+
+
+            boolean suspicious = !(suspiciousObjects.isEmpty() && suspiciousFields.isEmpty());
+            if (suspicious) {
                 if (!lastPrintedSuspicion) {
                     System.out.println();
                     lastPrintedSuspicion = true;
                 }
-                System.out.print(stringBuilder.toString());
+                System.out.printf("\n\"%s\"\n", file);
+
+                if (!suspiciousObjects.isEmpty()) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(" * has ")
+                                 .append(suspiciousObjects.keySet().size())
+                                 .append(" revision(s) with multiple objects with the same object number:\n");
+                    int revCount = 0;
+                    for (int revision : suspiciousObjects.keySet()) {
+                        stringBuilder.append("   - ");
+                        if (++revCount > maxRevisions) {
+                            stringBuilder.append("...\n");
+                            break;
+                        }
+                        stringBuilder.append("Revision ")
+                                     .append(revision)
+                                     .append(" contains multiple object for the object numbers");
+                        int objNumberCount = 0;
+                        for (int objNumber : suspiciousObjects.get(revision)) {
+                            stringBuilder.append(objNumberCount > 0 ? ", " : " ");
+                            if (++objNumberCount > maxObjNumbersPerRevision) {
+                                stringBuilder.append("...\n");
+                                break;
+                            }
+                            stringBuilder.append(objNumber);
+                        }
+                        stringBuilder.append('\n');
+                    }
+
+                    System.out.print(stringBuilder.toString());
+                }
+
+                if (!suspiciousFields.isEmpty()) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(" * has ")
+                                 .append(suspiciousFields.keySet().size())
+                                 .append(" field(s) with differing appearance texts and values:\n");
+                    int fieldCount = 0;
+                    for (Map.Entry<String, FieldValues<String>> entry : suspiciousFields.entrySet()) {
+                        FieldValues<String> values = entry.getValue();
+                        stringBuilder.append("   - ");
+                        if (++fieldCount > maxFields) {
+                            stringBuilder.append("...\n");
+                            break;
+                        }
+                        stringBuilder.append("Field \"")
+                                     .append(escapeValue(entry.getKey()))
+                                     .append("\" has value \"")
+                                     .append(escapeValue(values.getActualValue()))
+                                     .append("\" and appearance texts");
+                        int objValueCount = 0;
+                        for (String value : values.getWidgetValues()) {
+                            stringBuilder.append(objValueCount > 0 ? ", " : " ");
+                            if (++objValueCount > maxObjNumbersPerRevision) {
+                                stringBuilder.append("...\n");
+                                break;
+                            }
+                            stringBuilder.append('"')
+                                         .append(escapeValue(value))
+                                         .append('"');
+                        }
+                        stringBuilder.append('\n');
+                    }
+
+                    System.out.print(stringBuilder.toString());
+                }
+
                 countSuspiciousPdfs++;
             } else {
                 printProgress();
@@ -112,8 +169,17 @@ public class SuspectPdfFinder {
         System.out.printf("\rPDFs (suspicious): %d (%d), other files: %d, folders: %d", countPdfs, countSuspiciousPdfs, countOtherFiles, countDirs);
     }
 
+    String escapeValue(String value) {
+        if (value != null) {
+            value = value.replace("\\", "\\\\").replace("\r", "\\r").replace("\n", "\\n");
+        }
+        return value;
+    }
+
     int maxRevisions = 3;
     int maxObjNumbersPerRevision = 10;
+    int maxFields = 3;
+    int maxValues = 10;
 
     boolean lastPrintedSuspicion = false;
     int countDirs = 0;
