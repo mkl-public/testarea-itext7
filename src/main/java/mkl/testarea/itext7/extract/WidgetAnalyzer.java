@@ -40,6 +40,7 @@ import com.itextpdf.kernel.pdf.canvas.parser.listener.SimpleTextExtractionStrate
 public class WidgetAnalyzer implements Closeable {
     public WidgetAnalyzer(IRandomAccessSource byteSource, ReaderProperties properties) throws IOException {
         PdfReader pdfReader = new PdfReader(byteSource, properties);
+        pdfReader.setUnethicalReading(true);
         pdfDocument = new PdfDocument(pdfReader);
     }
 
@@ -52,21 +53,23 @@ public class WidgetAnalyzer implements Closeable {
         Map<String, FieldValues<String>> fieldValues = new HashMap<String, FieldValues<String>>();
 
         PdfAcroForm pdfAcroForm = PdfAcroForm.getAcroForm(pdfDocument, false);
-        for (Map.Entry<String, PdfFormField> entry : pdfAcroForm.getFormFields().entrySet()) {
-            String name = entry.getKey();
-            PdfFormField field = entry.getValue();
-            if (field instanceof PdfTextFormField) {
-                PdfTextFormField textField = (PdfTextFormField) field;
-                String actualValue = textField.getValueAsString();
-                Set<String> widgetTexts = new TreeSet<String>();
-                for (PdfWidgetAnnotation widget : textField.getWidgets()) {
-                    PdfDictionary normal = widget.getNormalAppearanceObject();
-                    if (normal instanceof PdfStream) {
-                        String widgetText = extractText((PdfStream) normal);
-                        widgetTexts.add(widgetText);
+        if (pdfAcroForm != null) {
+            for (Map.Entry<String, PdfFormField> entry : pdfAcroForm.getFormFields().entrySet()) {
+                String name = entry.getKey();
+                PdfFormField field = entry.getValue();
+                if (field instanceof PdfTextFormField) {
+                    PdfTextFormField textField = (PdfTextFormField) field;
+                    String actualValue = textField.getValueAsString();
+                    Set<String> widgetTexts = new TreeSet<String>();
+                    for (PdfWidgetAnnotation widget : textField.getWidgets()) {
+                        PdfDictionary normal = widget.getNormalAppearanceObject();
+                        if (normal instanceof PdfStream) {
+                            String widgetText = extractText((PdfStream) normal);
+                            widgetTexts.add(widgetText);
+                        }
                     }
+                    fieldValues.put(name, new FieldValues<String>(name, actualValue, widgetTexts));
                 }
-                fieldValues.put(name, new FieldValues<String>(name, actualValue, widgetTexts));
             }
         }
 

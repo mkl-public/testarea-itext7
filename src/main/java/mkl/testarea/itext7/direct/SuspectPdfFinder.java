@@ -1,6 +1,7 @@
 package mkl.testarea.itext7.direct;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -12,9 +13,13 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
+import com.itextpdf.kernel.crypto.BadPasswordException;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.ReaderProperties;
 
+import mkl.testarea.itext7.extract.ContentAnalyzer;
 import mkl.testarea.itext7.extract.FieldValues;
+import mkl.testarea.itext7.extract.HiddenText;
 import mkl.testarea.itext7.extract.WidgetAnalyzer;
 
 /**
@@ -45,39 +50,56 @@ public class SuspectPdfFinder {
                 check(file);
             }
         }
+        printProgress();
     }
 
     void check(String file) {
         try (   ObjectStructureAnalyzer objectAnalyzer = new ObjectStructureAnalyzer(new RandomAccessSourceFactory().createBestSource(file), new ReaderProperties());
-                WidgetAnalyzer widgetAnalyzer = new WidgetAnalyzer(new RandomAccessSourceFactory().createBestSource(file), new ReaderProperties())  ) {
+                WidgetAnalyzer widgetAnalyzer = new WidgetAnalyzer(new RandomAccessSourceFactory().createBestSource(file), new ReaderProperties());
+                ContentAnalyzer contentAnalyzer = new ContentAnalyzer(new RandomAccessSourceFactory().createBestSource(file), new ReaderProperties())   ) {
+            List<String> errors = new ArrayList<String>();
+
             Multimap<Integer, Integer> suspiciousObjects = MultimapBuilder.treeKeys().treeSetValues().build();
-            Multimap<Integer, ExtPdfIndirectReference> references = objectAnalyzer.findIndirectObjects();
-            for (Integer num : references.keySet()) {
-                Collection<ExtPdfIndirectReference> theseReferences = references.get(num);
-                if (theseReferences.size() > 1) {
-                    List<Integer> revs = theseReferences.stream().map(ExtPdfIndirectReference::getRevNr).collect(Collectors.toList());
-                    revs.sort(null);
-                    int prevRevision = -1;
-                    for (int rev : revs) {
-                        if (prevRevision == rev) {
-                            suspiciousObjects.put(rev, num);
+            catchErrors(errors, "error in object structure analyzer: %s", () -> {
+                Multimap<Integer, ExtPdfIndirectReference> references = objectAnalyzer.findIndirectObjects();
+                for (Integer num : references.keySet()) {
+                    Collection<ExtPdfIndirectReference> theseReferences = references.get(num);
+                    if (theseReferences.size() > 1) {
+                        List<Integer> revs = theseReferences.stream().map(ExtPdfIndirectReference::getRevNr).collect(Collectors.toList());
+                        revs.sort(null);
+                        int prevRevision = -1;
+                        for (int rev : revs) {
+                            if (prevRevision == rev) {
+                                suspiciousObjects.put(rev, num);
+                            }
+                            prevRevision = rev;
                         }
-                        prevRevision = rev;
                     }
                 }
-            }
+            });
 
             Map<String, FieldValues<String>> suspiciousFields = new TreeMap<String, FieldValues<String>>();
-            Map<String, FieldValues<String>> fieldValues = widgetAnalyzer.findFieldValues();
-            for (Map.Entry<String, FieldValues<String>> entry : fieldValues.entrySet()) {
-                FieldValues<String> values = entry.getValue();
-                Set<String> widgetValues = values.getWidgetValues();
-                if (widgetValues.size() > 1 || (widgetValues.size() == 1 && !values.getActualValue().equals(widgetValues.iterator().next())))
-                    suspiciousFields.put(entry.getKey(), values);
-            }
+            catchErrors(errors, "error in widget analyzer: %s", () -> {
+                Map<String, FieldValues<String>> fieldValues = widgetAnalyzer.findFieldValues();
+                for (Map.Entry<String, FieldValues<String>> entry : fieldValues.entrySet()) {
+                    FieldValues<String> values = entry.getValue();
+                    Set<String> widgetValues = values.getWidgetValues();
+                    if (widgetValues.size() > 1 || (widgetValues.size() == 1 && !values.getActualValue().trim().equals(widgetValues.iterator().next().trim())))
+                        suspiciousFields.put(entry.getKey(), values);
+                }
+            });
 
+            Multimap<Integer, HiddenText> suspiciousHiddenTexts = MultimapBuilder.treeKeys().hashSetValues().build();
+            catchErrors(errors, "error in content analyzer: %s", () -> {
+                Multimap<Integer, HiddenText> hiddenTexts = contentAnalyzer.findHiddenTexts();
+                for (Map.Entry<Integer, HiddenText> entry : hiddenTexts.entries()) {
+                    HiddenText hiddenText = entry.getValue();
+                    if (hiddenText.getXobject().getPdfObject().getIndirectReference() != null && hiddenText.getText().trim().length() > 0)
+                        suspiciousHiddenTexts.put(entry.getKey(), entry.getValue());
+                }
+            });
 
-            boolean suspicious = !(suspiciousObjects.isEmpty() && suspiciousFields.isEmpty());
+            boolean suspicious = !(suspiciousObjects.isEmpty() && suspiciousFields.isEmpty() && suspiciousHiddenTexts.isEmpty() && errors.isEmpty());
             if (suspicious) {
                 if (!lastPrintedSuspicion) {
                     System.out.println();
@@ -136,7 +158,7 @@ public class SuspectPdfFinder {
                         int objValueCount = 0;
                         for (String value : values.getWidgetValues()) {
                             stringBuilder.append(objValueCount > 0 ? ", " : " ");
-                            if (++objValueCount > maxObjNumbersPerRevision) {
+                            if (++objValueCount > maxValues) {
                                 stringBuilder.append("...\n");
                                 break;
                             }
@@ -150,12 +172,53 @@ public class SuspectPdfFinder {
                     System.out.print(stringBuilder.toString());
                 }
 
+                if (!suspiciousHiddenTexts.isEmpty()) {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(" * has ")
+                                 .append(suspiciousHiddenTexts.size())
+                                 .append(" image(s) covering text:\n");
+                    int textCount = 0;
+                    for (HiddenText hiddenText : suspiciousHiddenTexts.values()) {
+                        stringBuilder.append("   - ");
+                        if (++textCount > maxTexts) {
+                            stringBuilder.append("...\n");
+                            break;
+                        }
+                        PdfIndirectReference reference = hiddenText.getXobject().getPdfObject().getIndirectReference();
+                        stringBuilder.append("On page ")
+                                     .append(hiddenText.getPage())
+                                     .append(" the image ")
+                                     .append(reference.getObjNumber())
+                                     .append(' ')
+                                     .append(reference.getGenNumber())
+                                     .append(" covers the text \"")
+                                     .append(escapeValue(hiddenText.getText()))
+                                     .append("\".\n");
+                    }
+
+                    System.out.print(stringBuilder.toString());
+                }
+
+                if (!errors.isEmpty()) {
+                    for (String error : errors) {
+                        System.out.printf(" * %s\n", error);
+                    }
+                }
+
                 countSuspiciousPdfs++;
             } else {
                 printProgress();
             }
             countPdfs++;
-        } catch (Exception e) {
+        } catch(BadPasswordException e) {
+            System.out.printf("\n\"%s\"\n * Password issue: %s\n", file, e.getMessage());
+            countSuspiciousPdfs++;
+        } catch (Throwable e) {
+            if (file.endsWith(".pdf")) {
+//                System.out.printf("\n!!! %s\n", file);
+//                e.printStackTrace(System.out);
+                System.out.printf("\n\"%s\"\n * Failure: %s\n", file, e.getMessage());
+            }
             countOtherFiles++;
             printProgress();
         }
@@ -176,10 +239,24 @@ public class SuspectPdfFinder {
         return value;
     }
 
+    void catchErrors(List<String> errors, String format, Task task) {
+        try {
+            task.execute();
+        } catch (Throwable e) {
+            String message = String.format(format, e.getLocalizedMessage());
+            errors.add(message);
+        }
+    }
+
+    interface Task {
+        void execute() throws Exception;
+    }
+
     int maxRevisions = 3;
     int maxObjNumbersPerRevision = 10;
     int maxFields = 3;
     int maxValues = 10;
+    int maxTexts = 3;
 
     boolean lastPrintedSuspicion = false;
     int countDirs = 0;

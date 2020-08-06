@@ -33,6 +33,7 @@ import com.itextpdf.kernel.pdf.ReaderProperties;
 public class ObjectStructureAnalyzer extends PdfReader {
     public ObjectStructureAnalyzer(IRandomAccessSource byteSource, ReaderProperties properties) throws IOException {
         super(byteSource, properties);
+        setUnethicalReading(true);
     }
 
     /**
