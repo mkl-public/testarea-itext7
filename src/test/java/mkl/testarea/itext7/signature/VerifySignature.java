@@ -70,4 +70,35 @@ public class VerifySignature {
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/63398930/pdf-signature-ignored-by-acrobat-but-visible-in-other-validation-tools">
+     * PDF signature ignored by Acrobat but visible in other validation tools
+     * </a>
+     * <br/>
+     * <a href="https://easyupload.io/2lrfg8">
+     * rfc6455 (3).pdf
+     * </a>
+     * <p>
+     * Apparently this file can be validated by iText.
+     * </p>
+     */
+    @Test
+    public void testVerifyRfc6455() throws IOException, GeneralSecurityException {
+        System.out.println("\n\nrfc6455 (3).pdf\n===================");
+        
+        try (   InputStream resource = getClass().getResourceAsStream("rfc6455 (3).pdf") ) {
+            PdfDocument pdfDoc = new PdfDocument(new PdfReader(resource, new ReaderProperties().setPassword("password".getBytes())));
+            SignatureUtil signUtil = new SignatureUtil(pdfDoc);
+            List<String> names = signUtil.getSignatureNames();
+            for (String name : names) {
+                System.out.println("===== " + name + " =====");
+                System.out.println("Signature covers whole document: " + signUtil.signatureCoversWholeDocument(name));
+                System.out.println("Document revision: " + signUtil.getRevision(name) + " of " + signUtil.getTotalRevisions());
+                PdfPKCS7 pkcs7 = signUtil.verifySignature(name);
+                System.out.println("Subject: " + CertificateInfo.getSubjectFields(pkcs7.getSigningCertificate()));
+                System.out.println("Integrity check OK? " + pkcs7.verify());
+            }
+            System.out.println();
+        }
+    }
 }
