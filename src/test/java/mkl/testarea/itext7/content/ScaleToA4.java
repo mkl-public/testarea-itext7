@@ -74,6 +74,35 @@ public class ScaleToA4 {
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/63576068/java-itext-there-is-no-associate-pdfwriter-for-making-indirects">
+     * Java iText There is no associate PdfWriter for making indirects
+     * </a>
+     * <p>
+     * This test shows how to merge and scale.
+     * </p>
+     */
+    @Test
+    public void testMergeAndScale() throws IOException {
+        Rectangle pageSize = PageSize.A4;
+        Rectangle pageBodySize = pageSize.clone().applyMargins(72, 72, 72, 72, false);
+        
+        try (   PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "mergedAndScaled.pdf"));
+                PdfDocument mergedPdf = new PdfDocument(pdfWriter)) {
+            try (   InputStream resource = getClass().getResourceAsStream("_FDA_Requires_Use_of_eCTD_Format_and_Standardized_Study_Data_in_Future_Regulatory_Submissions__Sept.pdf");
+                    PdfReader pdfReader = new PdfReader(resource);
+                    PdfDocument pdfDocument = new PdfDocument(pdfReader)) {
+                pdfDocument.copyPagesTo(1, pdfDocument.getNumberOfPages(), mergedPdf);
+            }
+            try (   InputStream resource = getClass().getResourceAsStream("021549Orig1s025_aprepitant_clinpharm_prea_Mac.pdf");
+                    PdfReader pdfReader = new PdfReader(resource);
+                    PdfDocument pdfDocument = new PdfDocument(pdfReader)) {
+                pdfDocument.copyPagesTo(1, pdfDocument.getNumberOfPages(), mergedPdf);
+            }
+            scale(mergedPdf, pageSize, pageBodySize);
+        }
+    }
+
     void scale(PdfDocument pdfDocument, Rectangle pageSize, Rectangle pageBodySize) {
         int n = pdfDocument.getNumberOfPages();
 
