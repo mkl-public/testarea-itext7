@@ -65,4 +65,55 @@ public class MakeLtvEnabled {
             adobeLtvEnabling.enable(ocsp, crl);
         }
     }
+
+    @Test
+    public void testLtvEnableNotLTVenabled() throws IOException, GeneralSecurityException, StreamParsingException, OCSPException, OperatorException {
+        try (   InputStream resource = getClass().getResourceAsStream("notLTVenabled.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "notLTVenabled-LtvEnabled.pdf"));
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().preserveEncryption().useAppendMode())) {
+            AdobeLtvEnabling adobeLtvEnabling = new AdobeLtvEnabling(pdfDocument);
+            IOcspClient ocsp = new OcspClientBouncyCastle(null);
+            ICrlClient crl = new CrlClientOnline();
+            adobeLtvEnabling.enable(ocsp, crl);
+        }
+    }
+
+    @Test
+    public void testLtvEnableNotLTVenabled001() throws IOException, GeneralSecurityException, StreamParsingException, OCSPException, OperatorException {
+        try (   InputStream resource = getClass().getResourceAsStream("notLTVenabled-001.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "notLTVenabled-001-LtvEnabled.pdf"));
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().preserveEncryption().useAppendMode())) {
+            AdobeLtvEnabling adobeLtvEnabling = new AdobeLtvEnabling(pdfDocument);
+            IOcspClient ocsp = new OcspClientBouncyCastle(null);
+            ICrlClient crl = new CrlClientOnline();
+            adobeLtvEnabling.enable(ocsp, crl);
+        }
+    }
+
+    /**
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-3017">
+     * Improve document signing
+     * </a>
+     * <br/>
+     * <a href="https://issues.apache.org/jira/secure/attachment/13013996/Eingangsbestaetigung-376670811-sig.pdf">
+     * Eingangsbestaetigung-376670811-sig.pdf
+     * </a>
+     * <p>
+     * Also with a DSS added like this, Adobe Reader is unhappy.
+     * </p>
+     */
+    @Test
+    public void testLtvEnableEingangsbestaetigung376670811sig() throws IOException, GeneralSecurityException, StreamParsingException, OCSPException, OperatorException {
+        try (   InputStream resource = getClass().getResourceAsStream("Eingangsbestaetigung-376670811-sig.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "Eingangsbestaetigung-376670811-sig-LtvEnabled.pdf"));
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().preserveEncryption().useAppendMode())) {
+            AdobeLtvEnabling adobeLtvEnabling = new AdobeLtvEnabling(pdfDocument);
+            IOcspClient ocsp = new OcspClientBouncyCastle(null);
+            ICrlClient crl = new CrlClientOnline();
+            adobeLtvEnabling.enable(ocsp, crl);
+        }
+    }
 }
