@@ -116,4 +116,31 @@ public class MakeLtvEnabled {
             adobeLtvEnabling.enable(ocsp, crl);
         }
     }
+
+    /**
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-2776">
+     * support "Long Term Validation" signature extensions (LTV)
+     * </a>
+     * <br/>
+     * <a href="https://issues.apache.org/jira/secure/attachment/13014110/notCertified_368835_Sig_en_201026090509.pdf">
+     * notCertified_368835_Sig_en_201026090509.pdf
+     * </a>
+     * <p>
+     * Signature in target document is LTV enabled. The warning concerning
+     * changes is unrelated.
+     * </p>
+     */
+    @Test
+    public void testLtvEnableNotCertified368835SigEn201026090509() throws IOException, GeneralSecurityException, StreamParsingException, OCSPException, OperatorException {
+        try (   InputStream resource = getClass().getResourceAsStream("notCertified_368835_Sig_en_201026090509.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "notCertified_368835_Sig_en_201026090509-LtvEnabled.pdf"));
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().preserveEncryption().useAppendMode())) {
+            AdobeLtvEnabling adobeLtvEnabling = new AdobeLtvEnabling(pdfDocument);
+            IOcspClient ocsp = new OcspClientBouncyCastle(null);
+            ICrlClient crl = new CrlClientOnline();
+            adobeLtvEnabling.enable(ocsp, crl);
+        }
+    }
+
 }
