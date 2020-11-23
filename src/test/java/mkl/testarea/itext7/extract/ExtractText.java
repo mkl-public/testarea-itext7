@@ -120,4 +120,37 @@ public class ExtractText
             System.out.printf("\nText from GustavoPiucco-2.pdf\n=====\n%s\n=====", sb);
         }
     }
+
+    /**
+     * <a href="https://issues.apache.org/jira/browse/PDFBOX-5023">
+     * OpenType Layout tables used in font ArabicTransparent-ARABIC are not implemented in PDFBox and will be ignored
+     * </a>
+     * <br/>
+     * <a href="https://issues.apache.org/jira/secure/attachment/13015751/pdfsample.pdf">
+     * pdfsample.pdf
+     * </a>
+     * <p>
+     * iText text extraction throws an exception here, it is caused by the
+     * ROS Adobe-Arabic1-0 which iText does not support. Apparently that ROS
+     * also is not known to the "CMap resources for Adobe’s public character
+     * collections" github project...
+     * </p>
+     */
+    @Test
+    public void testExtractPdfSample() throws IOException
+    {
+        try (   InputStream resourceStream = getClass().getResourceAsStream("pdfsample.pdf");
+                PdfReader reader = new PdfReader(resourceStream);
+                PdfDocument document = new PdfDocument(reader)  )
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int pageNum = 1; pageNum <= document.getNumberOfPages(); pageNum++)
+            {
+                PdfPage page = document.getPage(pageNum);
+                sb.append(PdfTextExtractor.getTextFromPage(page, new LocationTextExtractionStrategy()));
+            }
+
+            System.out.printf("\nText from pdfsample.pdf\n=====\n%s\n=====", sb);
+        }
+    }
 }
