@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import com.itextpdf.io.font.FontMetrics;
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.colors.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.PageSize;
@@ -15,7 +17,10 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.Style;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.property.TextAlignment;
 
 /**
  * @author mkl
@@ -85,4 +90,49 @@ public class TextPosition {
         document.close();
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/64972425/what-value-to-use-for-moveup-of-canvas">
+     * What value to use for .MoveUp of canvas
+     * </a>
+     * <p>
+     * This test runs the code of the OP optimized to not rely on
+     * magic numbers: The offset by 4 observed by the OP actually
+     * is required to counteract the {@link Paragraph} default top
+     * margin value of 4. Thus, explicitly setting the paragraph
+     * top margin to 0 resolves the issue.
+     * </p>
+     */
+    @Test
+    public void testForGustav() throws IOException {
+        try (
+                PdfDocument pdfDocument = new PdfDocument(new PdfWriter(new File(RESULT_FOLDER, "TextPositionForGustav.pdf")));
+                Document document = new Document(pdfDocument);
+        ) {
+            document.setMargins(0, 0, 0, 0);
+            Style style = registrationStyle();
+            Paragraph paragraph = new Paragraph("Testing 4567X").addStyle(style).setFontSize(40).setMarginTop(0);
+            document.add(paragraph);
+        }
+    }
+
+    /** @see #testForGustav() */
+    private static Style registrationStyle() throws IOException {
+        PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+        float fontSize = 8F;
+        float rightPadding = 3F;
+        TextAlignment textAlignment = TextAlignment.RIGHT;
+        Color borderColor = ColorConstants.RED;
+        Color fillColor = ColorConstants.WHITE;
+        float borderWidth = 0.7F;
+
+        Style style = new Style()
+            .setFont(font)
+            .setFontSize(fontSize)
+            .setPaddingRight(rightPadding)
+            .setTextAlignment(textAlignment)
+            .setBackgroundColor(fillColor)
+            .setBorder(new SolidBorder(borderColor, borderWidth));
+
+        return style;
+    }
 }
