@@ -14,7 +14,9 @@ import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.SolidBorder;
@@ -103,4 +105,36 @@ public class ShowTextAtPosition {
             document.add(img);
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/65339560/add-a-text-on-an-existing-pdf-document-by-appending-something-after-the-pdf-cont">
+     * Add a text on an existing PDF document by appending something after the PDF content
+     * </a>
+     * <p>
+     * This test adds content to a PDF in append mode for Fratt (the OP
+     * of the SO question) to analyze and reverse-engineer.
+     * </p>
+     */
+    @Test
+    public void testAddCenteredBorderedParagraph() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("test.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "test-CenterParagraph.pdf"));
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().useAppendMode());
+                Document document = new Document(pdfDocument)   ) {
+            pdfWriter.setCompressionLevel(0);
+            Paragraph paragraph = new Paragraph("Hello! This text is added for Fratt");
+            paragraph
+                .setWidth(100)
+                .setBorder(new SolidBorder(new DeviceRgb(0f, 0f, 0.6f), 3))
+                .setRotationAngle(Math.PI / 4);
+            Rectangle box = pdfDocument.getFirstPage().getCropBox();
+            document.showTextAligned(paragraph,
+                (box.getLeft() + box.getRight()) / 2,
+                (box.getTop() + box.getBottom()) / 2,
+                TextAlignment.CENTER,
+                VerticalAlignment.MIDDLE);
+        }
+    }
+
 }
