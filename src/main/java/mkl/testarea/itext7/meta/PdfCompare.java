@@ -21,6 +21,7 @@ import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfStream;
@@ -42,9 +43,9 @@ public class PdfCompare {
 
             List<Difference> differences = pdfCompare.getDifferences();
             if (differences == null || differences.isEmpty()) {
-                System.out.println("No differencces found.");
+                System.out.println("No differences found.");
             } else {
-                System.out.printf("%d differencces found:\n", differences.size());
+                System.out.printf("%d differences found:\n", differences.size());
                 for (Difference difference : pdfCompare.getDifferences()) {
                     for (String element : difference.getPath()) {
                         System.out.print(element);
@@ -214,6 +215,12 @@ public class PdfCompare {
     }
 
     void compareContentsSimple(PdfObject object1, PdfObject object2, List<String> path) {
+        // vvv--- work-around for DEVSIX-4931, likely to be fixed in 7.1.15
+        if (object1 instanceof PdfNumber)
+            ((PdfNumber)object1).getValue();
+        if (object2 instanceof PdfNumber)
+            ((PdfNumber)object2).getValue();
+        // ^^^--- work-around for DEVSIX-4931, likely to be fixed in 7.1.15
         if (!object1.equals(object2)) {
             if (object1 instanceof PdfString) {
                 String string1 = object1.toString();
