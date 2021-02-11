@@ -29,6 +29,7 @@ import com.itextpdf.signatures.PdfSignatureAppearance;
 import com.itextpdf.signatures.PdfSigner;
 import com.itextpdf.signatures.PdfSigner.CryptoStandard;
 import com.itextpdf.signatures.PrivateKeySignature;
+import com.itextpdf.signatures.SignatureUtil;
 
 public class PdfTestSigner {
     public static final String KEYSTORE = "keystores/demo-rsa2048.p12"; 
@@ -53,6 +54,7 @@ public class PdfTestSigner {
         }
     }
 
+    public final static String FIELD = "FIELD:";
     public final static String TAG = "TAG";
     public final static String NOTAG = "NOTAG";
     public final static String COMPRESS = "COMPRESS";
@@ -63,10 +65,16 @@ public class PdfTestSigner {
         CryptoStandard cryptoStandard = CryptoStandard.CMS;
         boolean tag = true;
         boolean compress = true;
+        String fieldName = "Signature";
         for (String arg: args) {
             if (Arrays.stream(CryptoStandard.values()).anyMatch(c -> c.name().equals(arg))) {
                 cryptoStandard = CryptoStandard.valueOf(arg);
                 System.out.printf("\n### Selected crypto standard %s.\n\n", cryptoStandard);
+            } else if (arg.startsWith(FIELD)) {
+                fieldName = arg.substring(FIELD.length());
+                if (fieldName.length() == 0)
+                    fieldName = null;
+                System.out.printf("\n### Selected field name %s.\n\n", fieldName);
             } else {
                 switch (arg) {
                 case TAG:
@@ -90,7 +98,7 @@ public class PdfTestSigner {
                     final File file = new File(arg);
                     if (file.exists()) {
                         File target = new File(file.getParent(), file.getName() + "-signed-" + cryptoStandard + ".pdf");
-                        new PdfTestSigner(file, cryptoStandard).sign(target, tag, compress);
+                        new PdfTestSigner(file, cryptoStandard).sign(target, fieldName, tag, compress);
                         System.out.println("   signed successfully.\n");
                     } else
                         System.err.println("!!! File does not exist: " + file);
@@ -108,7 +116,7 @@ public class PdfTestSigner {
         this.cryptoStandard = cryptoStandard;
     }
 
-    public void sign(File target, boolean tag, boolean compress) throws IOException, GeneralSecurityException {
+    public void sign(File target, String fieldName, boolean tag, boolean compress) throws IOException, GeneralSecurityException {
         try (   PdfReader reader = new PdfReader(file.getAbsolutePath());
                 FileOutputStream os = new FileOutputStream(target)  ) {
             PdfSigner signer = new PdfSigner(reader, os, new StampingProperties().useAppendMode()) {
@@ -135,10 +143,12 @@ public class PdfTestSigner {
                     }
                 }
             };
-            signer.setFieldName("Signature");
-            PdfSignatureAppearance appearance = signer.getSignatureAppearance();
-            appearance.setPageNumber(1);
-            appearance.setPageRect(new Rectangle(36, 748, 144, 780));
+            signer.setFieldName(fieldName);
+            if (!new SignatureUtil(signer.getDocument()).getBlankSignatureNames().contains(fieldName)) {
+                PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+                appearance.setPageNumber(1);
+                appearance.setPageRect(new Rectangle(36, 748, 144, 780));
+            }
 
             IExternalDigest digest = new BouncyCastleDigest();
             IExternalSignature signature = new PrivateKeySignature(pk, DigestAlgorithms.SHA256, null);
