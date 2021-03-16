@@ -32,4 +32,28 @@ public class OpenFile {
             System.out.println(pdfDocument.getDocumentInfo().getAuthor());
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/66583475/pdf-becoming-corrupted-after-signing">
+     * PDF becoming corrupted after signing
+     * </a>
+     * <br/>
+     * <a href="https://ufile.io/uxq3gr6o">
+     * xrefstreamdoc (17).pdf
+     * </a>
+     * <p>
+     * There are multiple issues in the cross reference stream of this file.
+     * In particular there are less entries (22) than claimed (23), there is
+     * a shift (entry for object 1 points to object 2 etc), and there are even
+     * more objects in the file (at least an object 24).
+     * </p>
+     */
+    @Test
+    public void testOpenXrefstreamdoc17() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("xrefstreamdoc (17).pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfDocument pdfDocument = new PdfDocument(pdfReader)) {
+            System.out.println(pdfDocument.getDocumentInfo().getAuthor());
+        }
+    }
 }
