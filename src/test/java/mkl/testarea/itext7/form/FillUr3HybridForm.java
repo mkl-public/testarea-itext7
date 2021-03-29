@@ -15,6 +15,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.StampingProperties;
 
 /**
  * @author mkl
@@ -70,4 +71,61 @@ public class FillUr3HybridForm
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/66851032/how-to-prevent-flattening-of-interactive-fields-in-pdf-file-using-itext7">
+     * How to prevent flattening of interactive fields in Pdf file using iText7
+     * </a>
+     * <br/>
+     * <a href="https://filebin.net/86jgfn38ono89frc">
+     * Read_Pdf.pdf
+     * </a>
+     * <p>
+     * Here we have a XFA/Acroform hybrid form with usage rights
+     * signature but without encryption. Simple editing results
+     * in a PDF with broken usage right signature and, thus, with
+     * Adobe Reader providing only a read-only form. But see
+     * {@link #testManipulateLikeVitalShamWithAppend()}.
+     * </p>
+     */
+    @Test
+    public void testManipulateLikeVitalSham() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("Read_Pdf.pdf")) {
+            PdfReader pdfReader = new PdfReader(resource);
+            PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "Read_Pdf-rewritten.pdf"));
+
+            PdfDocument pdfDoc = new PdfDocument(pdfReader, pdfWriter);
+
+            pdfDoc.close();
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/66851032/how-to-prevent-flattening-of-interactive-fields-in-pdf-file-using-itext7">
+     * How to prevent flattening of interactive fields in Pdf file using iText7
+     * </a>
+     * <br/>
+     * <a href="https://filebin.net/86jgfn38ono89frc">
+     * Read_Pdf.pdf
+     * </a>
+     * <p>
+     * Here we have a XFA/Acroform hybrid form with usage rights
+     * signature but without encryption. Simple editing results
+     * in a PDF with broken usage right signature and, thus, with
+     * Adobe Reader providing only a read-only form, see
+     * {@link #testManipulateLikeVitalSham()}. Editing in append
+     * mode, though, keeps the signature valid and Adobe Reader
+     * happy.
+     * </p>
+     */
+    @Test
+    public void testManipulateLikeVitalShamWithAppend() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("Read_Pdf.pdf")) {
+            PdfReader pdfReader = new PdfReader(resource);
+            PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "Read_Pdf-rewrittenWithAppend.pdf"));
+
+            PdfDocument pdfDoc = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().useAppendMode());
+
+            pdfDoc.close();
+        }
+    }
 }
