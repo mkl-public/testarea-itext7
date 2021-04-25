@@ -1,6 +1,3 @@
-/**
- * 
- */
 package mkl.testarea.itext7.signature;
 
 import java.io.IOException;
@@ -21,14 +18,9 @@ import com.itextpdf.signatures.PdfPKCS7;
 import com.itextpdf.signatures.SignatureUtil;
 
 /**
- * @author mklink
- *
+ * @author mkl
  */
 public class VerifySignature {
-
-    /**
-     * @throws java.lang.Exception
-     */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         BouncyCastleProvider bcp = new BouncyCastleProvider();
@@ -88,6 +80,45 @@ public class VerifySignature {
         
         try (   InputStream resource = getClass().getResourceAsStream("rfc6455 (3).pdf") ) {
             PdfDocument pdfDoc = new PdfDocument(new PdfReader(resource, new ReaderProperties().setPassword("password".getBytes())));
+            SignatureUtil signUtil = new SignatureUtil(pdfDoc);
+            List<String> names = signUtil.getSignatureNames();
+            for (String name : names) {
+                System.out.println("===== " + name + " =====");
+                System.out.println("Signature covers whole document: " + signUtil.signatureCoversWholeDocument(name));
+                System.out.println("Document revision: " + signUtil.getRevision(name) + " of " + signUtil.getTotalRevisions());
+                PdfPKCS7 pkcs7 = signUtil.verifySignature(name);
+                System.out.println("Subject: " + CertificateInfo.getSubjectFields(pkcs7.getSigningCertificate()));
+                System.out.println("Integrity check OK? " + pkcs7.verify());
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/67214674/ecdsa-signed-pdf-fails-signature-verification-with-itext-7-c-but-succeeds-wi">
+     * ECDSA signed PDF fails signature verification with iText 7 (C#), but succeeds with Adobe Reader DC
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/drive/folders/1dTa8i2T7Fs-ibTTPOdC9Gb527S7-EeeO?usp=sharing">
+     * sample_signed_ecdsa.pdf
+     * </a>
+     * <p>
+     * Indeed, the signature does not validate.
+     * </p>
+     * <p>
+     * A more in-detail analysis shows that the ECDSA signature value is encoded
+     * using plain format while iText assumes a TLV encoded value. (The signature
+     * algorithm which usually implies the format here is incorrectly set to the
+     * OID of ECDSA public keys in the signed PDF at hand, not a specific signature
+     * algorithm at all.)
+     * </p>
+     */
+    @Test
+    public void testVerifySampleSignedEcdsa() throws IOException, GeneralSecurityException {
+        System.out.println("\n\nsample_signed_ecdsa.pdf\n===================");
+
+        try (   InputStream resource = getClass().getResourceAsStream("sample_signed_ecdsa.pdf") ) {
+            PdfDocument pdfDoc = new PdfDocument(new PdfReader(resource));
             SignatureUtil signUtil = new SignatureUtil(pdfDoc);
             List<String> names = signUtil.getSignatureNames();
             for (String name : names) {
