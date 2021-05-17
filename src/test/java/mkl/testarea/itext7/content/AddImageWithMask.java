@@ -34,7 +34,7 @@ public class AddImageWithMask {
      * </p>
      */
     @Test
-    public void test() throws IOException {
+    public void testAddImageInShape() throws IOException {
         try (   PdfWriter writer = new PdfWriter(new File(RESULT_FOLDER, "addImageInShape.pdf"));
                 PdfDocument pdfDoc = new PdfDocument(writer);
                 InputStream imageResource = getClass().getResourceAsStream("/mkl/testarea/itext7/annotate/Willi-1.jpg")) {
