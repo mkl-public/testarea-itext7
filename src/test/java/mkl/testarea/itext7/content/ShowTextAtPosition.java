@@ -137,4 +137,39 @@ public class ShowTextAtPosition {
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/67601323/add-paragraph-via-itext-layout-document-showtextaligned-on-first-page-only">
+     * Add Paragraph via itext.Layout.Document.ShowTextAligned on first Page only
+     * </a>
+     * <p>
+     * In the course of this question it became clear that the code in
+     * {@link #testAddCenteredBorderedParagraph()} does not add to the
+     * first page but instead to the large. Using a different overload
+     * of <code>Document.showTextAligned</code> allows adding to the
+     * first page, though.
+     * </p>
+     */
+    @Test
+    public void testAddCenteredBorderedParagraphOriginalFile() throws IOException {
+        try (   InputStream resource = getClass().getResourceAsStream("originalFile.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "originalFile-CenterParagraph.pdf"));
+                PdfDocument pdfDocument = new PdfDocument(pdfReader, pdfWriter, new StampingProperties().useAppendMode());
+                Document document = new Document(pdfDocument)   ) {
+            pdfWriter.setCompressionLevel(0);
+            Paragraph paragraph = new Paragraph("Hello! This text is added for Fratt");
+            paragraph
+                .setWidth(100)
+                .setBorder(new SolidBorder(new DeviceRgb(0f, 0f, 0.6f), 3))
+                .setRotationAngle(Math.PI / 4);
+            Rectangle box = pdfDocument.getFirstPage().getCropBox();
+            document.showTextAligned(paragraph,
+                (box.getLeft() + box.getRight()) / 2,
+                (box.getTop() + box.getBottom()) / 2,
+                1,
+                TextAlignment.CENTER,
+                VerticalAlignment.MIDDLE,
+                0);
+        }
+    }
 }
