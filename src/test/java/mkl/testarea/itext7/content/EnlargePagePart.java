@@ -62,7 +62,7 @@ public class EnlargePagePart
                 float sqrt2 = (float) Math.sqrt(2);
                 page = pdfDocument.addNewPage(PageSize.A4);
                 PdfCanvas pdfCanvas = new PdfCanvas(page);
-                pdfCanvas.addXObject(formXObject, 0, sqrt2, -sqrt2, 0, pageSize.getTop() * sqrt2, -pageSize.getLeft() * sqrt2);
+                pdfCanvas.addXObjectWithTransformationMatrix(formXObject, 0, sqrt2, -sqrt2, 0, pageSize.getTop() * sqrt2, -pageSize.getLeft() * sqrt2);
            }
         }
     }

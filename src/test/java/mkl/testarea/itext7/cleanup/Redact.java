@@ -27,6 +27,7 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.pdfcleanup.CleanUpProperties;
 import com.itextpdf.pdfcleanup.PdfCleanUpLocation;
 import com.itextpdf.pdfcleanup.PdfCleanUpProcessor;
 import com.itextpdf.pdfcleanup.PdfCleanUpTool;
@@ -87,7 +88,7 @@ public class Redact
                 }
             }
 
-            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations, new CleanUpProperties());
             cleaner.cleanUp();
         }
     }
@@ -138,7 +139,7 @@ public class Redact
             List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
             cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(0f, 0f, 595f, 680f)));
 
-            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations, new CleanUpProperties());
             cleaner.cleanUp();
         }
     }
@@ -168,7 +169,7 @@ public class Redact
             List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
             cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(190, 320, 430, 665)));
 
-            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations, new CleanUpProperties());
             cleaner.cleanUp();
         }
     }
@@ -206,7 +207,7 @@ public class Redact
             List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
             cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(150, 150, 200, 200)));
 
-            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations);
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDocument, cleanUpLocations, new CleanUpProperties());
             cleaner.cleanUp();
         }
     }
@@ -223,7 +224,7 @@ public class Redact
                 PdfDocument pdfDoc = new PdfDocument(writer);   ) {
             PdfCanvas pdfCanvas = new PdfCanvas(pdfDoc.addNewPage(new PageSize(500, 500)));
             for (int i = 0; i < 5; i++) {
-                pdfCanvas.addImage(image, 50, 0, 0, 50, i * 100 + 25, i * 100 + 25, true);
+                pdfCanvas.addImageWithTransformationMatrix(image, 50, 0, 0, 50, i * 100 + 25, i * 100 + 25, true);
             }
         }
 

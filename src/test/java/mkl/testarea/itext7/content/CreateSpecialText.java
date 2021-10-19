@@ -11,6 +11,7 @@ import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.util.StreamUtil;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -47,7 +48,7 @@ public class CreateSpecialText {
             PdfDocument pdf = new PdfDocument(dest);
             Document document = new Document(pdf);
             PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(resource), PdfEncodings.IDENTITY_H,
-                    false);
+                    EmbeddingStrategy.PREFER_NOT_EMBEDDED);
             Paragraph p = new Paragraph();
             p.setFont(font);
             p.add(new Text("\u9d28"));
@@ -59,7 +60,7 @@ public class CreateSpecialText {
             PdfDocument pdf = new PdfDocument(dest);
             Document document = new Document(pdf);
             PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(resource), PdfEncodings.IDENTITY_H,
-                    false);
+                    EmbeddingStrategy.PREFER_NOT_EMBEDDED);
             Paragraph p = new Paragraph();
             p.setFont(font);
             p.add(new Text("\u9d28"));
@@ -72,7 +73,7 @@ public class CreateSpecialText {
             PdfDocument pdf = new PdfDocument(dest);
             Document document = new Document(pdf);
             PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(resource), PdfEncodings.IDENTITY_H,
-                    false);
+                    EmbeddingStrategy.PREFER_NOT_EMBEDDED);
             Paragraph p = new Paragraph();
             p.setFont(font);
             p.add(new Text("\u9d28"));

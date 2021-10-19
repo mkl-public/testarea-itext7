@@ -93,7 +93,7 @@ public class EnableLtv
         List<String> names = signatureUtil.getSignatureNames();
         String sigName = names.get(names.size() - 1);
 
-        PdfPKCS7 pkcs7 = signatureUtil.verifySignature(sigName);
+        PdfPKCS7 pkcs7 = signatureUtil.readSignatureData(sigName);
 
         if (pkcs7.isTsp())
         {

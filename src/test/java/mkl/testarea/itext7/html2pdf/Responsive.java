@@ -16,7 +16,7 @@ import com.itextpdf.layout.font.FontProvider;
 import com.itextpdf.licensekey.LicenseKey;
 import com.itextpdf.styledxmlparser.css.media.MediaDeviceDescription;
 import com.itextpdf.styledxmlparser.css.media.MediaType;
-import com.itextpdf.styledxmlparser.css.util.CssUtils;
+import com.itextpdf.styledxmlparser.css.util.CssDimensionParsingUtils;
 
 /**
  * @author mklink
@@ -44,7 +44,7 @@ public class Responsive
         };
 
         for (int i = 0; i < pageSizes.length; i++) {
-            float width = CssUtils.parseAbsoluteLength("" + pageSizes[i].getWidth());
+            float width = CssDimensionParsingUtils.parseAbsoluteLength("" + pageSizes[i].getWidth());
             File dest = new File(RESULT_FOLDER, String.format("responsive_%s.pdf", width));
             try ( InputStream htmlSource = getClass().getResourceAsStream("responsive.html")    )
             {

@@ -46,7 +46,7 @@ public class AddImageUnder {
                     new PdfWriter(new File(RESULT_FOLDER, "test-image-added-like-kishore-penmetsa.pdf")));
             ImageData img = ImageDataFactory.create(StreamUtil.inputStreamToArray(imgResource));
             PdfCanvas under = new PdfCanvas(pdfDoc.getFirstPage().newContentStreamBefore(), new PdfResources(), pdfDoc);
-            under.addImage(img, 100, 0f, 0f, 100, 100, 300, false);
+            under.addImageWithTransformationMatrix(img, 100, 0f, 0f, 100, 100, 300, false);
             under.saveState();
             pdfDoc.close();
         }
@@ -71,7 +71,7 @@ public class AddImageUnder {
                     new PdfWriter(new File(RESULT_FOLDER, "test-image-added-like-kishore-penmetsa-fixed.pdf")));
             ImageData img = ImageDataFactory.create(StreamUtil.inputStreamToArray(imgResource));
             PdfCanvas under = new PdfCanvas(pdfDoc.getFirstPage().newContentStreamBefore(), pdfDoc.getFirstPage().getResources(), pdfDoc);
-            under.addImage(img, 100, 0f, 0f, 100, 100, 300, false);
+            under.addImageWithTransformationMatrix(img, 100, 0f, 0f, 100, 100, 300, false);
             pdfDoc.close();
         }
     }

@@ -19,6 +19,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.licensekey.LicenseKey;
+import com.itextpdf.pdfcleanup.CleanUpProperties;
 import com.itextpdf.pdfcleanup.PdfCleanUpLocation;
 import com.itextpdf.pdfcleanup.PdfCleanUpTool;
 
@@ -37,7 +38,7 @@ public class MoveSectionCleanly
 
     /**
      * <a href="http://stackoverflow.com/questions/40551553/moving-text-on-a-page-with-itext7-retaining-font-color-style-but-changing">
-     * Moving text on a page with iText7 retaining font, color, style, … but changing size of the text
+     * Moving text on a page with iText7 retaining font, color, style, ï¿½ but changing size of the text
      * </a>
      * <p>
      * This example shows how to "move" content from a source rectangle to a target rectangle
@@ -59,7 +60,7 @@ public class MoveSectionCleanly
 
     /**
      * <a href="http://stackoverflow.com/questions/40551553/moving-text-on-a-page-with-itext7-retaining-font-color-style-but-changing">
-     * Moving text on a page with iText7 retaining font, color, style, … but changing size of the text
+     * Moving text on a page with iText7 retaining font, color, style, ï¿½ but changing size of the text
      * </a>
      * <p>
      * This is the actual worker method which "moves" content from a source rectangle to a target
@@ -90,7 +91,7 @@ public class MoveSectionCleanly
             cleanUpLocations.add(new PdfCleanUpLocation(page, from, null));
             cleanUpLocations.add(new PdfCleanUpLocation(page, to, null));
 
-            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfMainDocument, cleanUpLocations);
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfMainDocument, cleanUpLocations, new CleanUpProperties());
             cleaner.cleanUp();
 
             cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
@@ -105,7 +106,7 @@ public class MoveSectionCleanly
             if (from.getRight() < mediaBox.getRight())
                 cleanUpLocations.add(new PdfCleanUpLocation(1, new Rectangle(from.getRight(), mediaBox.getBottom(), mediaBox.getRight() - from.getRight(), mediaBox.getHeight()), null));
 
-            cleaner = new PdfCleanUpTool(pdfSectionDocument, cleanUpLocations);
+            cleaner = new PdfCleanUpTool(pdfSectionDocument, cleanUpLocations, new CleanUpProperties());
             cleaner.cleanUp();
         }
 
@@ -117,7 +118,7 @@ public class MoveSectionCleanly
             PdfFormXObject pageXObject = pdfSectionDocument.getFirstPage().copyAsFormXObject(pdfMainDocument);
             PdfPage pdfPage = pdfMainDocument.getPage(page);
             PdfCanvas pdfCanvas = new PdfCanvas(pdfPage);
-            pdfCanvas.addXObject(pageXObject, scale, 0, 0, scale, (to.getLeft() - from.getLeft() * scale), (to.getBottom() - from.getBottom() * scale));
+            pdfCanvas.addXObjectWithTransformationMatrix(pageXObject, scale, 0, 0, scale, (to.getLeft() - from.getLeft() * scale), (to.getBottom() - from.getBottom() * scale));
         }
     }
 }

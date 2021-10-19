@@ -51,7 +51,7 @@ public class AddImageToLayer {
 
             // using a Canvas, to allow iText layout'ing the image
             PdfCanvas pdfCanvas = new PdfCanvas(pdfDoc.addNewPage());
-            try (   Canvas canvas = new Canvas(pdfCanvas, pdfDoc, document.getPageEffectiveArea(pdfDoc.getDefaultPageSize()))   ) {
+            try (   Canvas canvas = new Canvas(pdfCanvas, document.getPageEffectiveArea(pdfDoc.getDefaultPageSize()))   ) {
                 canvas.add(new Paragraph("This image is added using a Canvas:"));
                 pdfCanvas.beginLayer(pdflayer);
                 canvas.add(img);
@@ -61,7 +61,7 @@ public class AddImageToLayer {
 
             // or directly 
             pdfCanvas.beginLayer(pdflayer);
-            pdfCanvas.addImage(data, 100, 100, false);
+            pdfCanvas.addImageAt(data, 100, 100, false);
             pdfCanvas.endLayer();
         }
     }

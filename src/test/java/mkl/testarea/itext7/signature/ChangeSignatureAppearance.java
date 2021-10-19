@@ -120,7 +120,7 @@ public class ChangeSignatureAppearance
 
             for (String name : signatureUtil.getSignatureNames())
             {
-                PdfPKCS7 pkcs7 = signatureUtil.verifySignature(name);
+                PdfPKCS7 pkcs7 = signatureUtil.readSignatureData(name);
                 X509Certificate signerCert = (X509Certificate) pkcs7.getSigningCertificate();
                 String signerName = CertificateInfo.getSubjectFields(signerCert).getField("CN");
                 PdfFormField field = acroForm.getField(name);
@@ -174,7 +174,7 @@ public class ChangeSignatureAppearance
 
             for (String name : signatureUtil.getSignatureNames())
             {
-                PdfPKCS7 pkcs7 = signatureUtil.verifySignature(name);
+                PdfPKCS7 pkcs7 = signatureUtil.readSignatureData(name);
                 X509Certificate signerCert = (X509Certificate) pkcs7.getSigningCertificate();
                 String signerName = CertificateInfo.getSubjectFields(signerCert).getField("CN");
                 PdfFormField field = acroForm.getField(name);

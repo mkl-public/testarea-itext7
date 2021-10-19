@@ -22,6 +22,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.WriterProperties;
 import com.itextpdf.signatures.BouncyCastleDigest;
 import com.itextpdf.signatures.IExternalSignature;
@@ -100,7 +101,7 @@ public class EncryptAndSign {
         String digestAlgorithm = "SHA512";
 
         PdfReader reader = new PdfReader(original, new ReaderProperties().setPassword(password));
-        PdfSigner signer = new PdfSigner(reader, result, isAppendMode);
+        PdfSigner signer = new PdfSigner(reader, result, isAppendMode ? new StampingProperties().useAppendMode() : new StampingProperties());
 
         signer.setCertificationLevel(certificationLevel);
 

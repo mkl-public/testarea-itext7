@@ -9,6 +9,7 @@ import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.util.StreamUtil;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy;
 
 /**
  * @author mkl
@@ -36,14 +37,14 @@ public class CheckForCharacter {
     @Test
     public void testCheckForMissingAInArtScript() throws IOException {
         try (   InputStream aEmptiedStream = getClass().getResourceAsStream("ArtScript-a-emptied.ttf")) {
-            PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(aEmptiedStream), PdfEncodings.IDENTITY_H, true);
+            PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(aEmptiedStream), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
             System.out.println("ArtScript-a-emptied.ttf");
             System.out.println("font_without_a " + font.getWidth("a",17));
             System.out.println(font.containsGlyph('a'));
         }
 
         try (   InputStream aRemovedStream = getClass().getResourceAsStream("ArtScript-a-removed.ttf")) {
-            PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(aRemovedStream), PdfEncodings.IDENTITY_H, true);
+            PdfFont font = PdfFontFactory.createFont(StreamUtil.inputStreamToArray(aRemovedStream), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
             System.out.println("ArtScript-a-removed.ttf");
             System.out.println("font_without_a " + font.getWidth("a",17));
             System.out.println(font.containsGlyph('a'));

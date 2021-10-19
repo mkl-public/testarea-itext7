@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.itextpdf.io.source.RandomAccessSourceFactory;
-import com.itextpdf.kernel.crypto.BadPasswordException;
+import com.itextpdf.kernel.exceptions.BadPasswordException;
 import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.ReaderProperties;
 

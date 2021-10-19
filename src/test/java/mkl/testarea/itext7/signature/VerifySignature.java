@@ -54,9 +54,9 @@ public class VerifySignature {
                 System.out.println("===== " + name + " =====");
                 System.out.println("Signature covers whole document: " + signUtil.signatureCoversWholeDocument(name));
                 System.out.println("Document revision: " + signUtil.getRevision(name) + " of " + signUtil.getTotalRevisions());
-                PdfPKCS7 pkcs7 = signUtil.verifySignature(name);
+                PdfPKCS7 pkcs7 = signUtil.readSignatureData(name);
                 System.out.println("Subject: " + CertificateInfo.getSubjectFields(pkcs7.getSigningCertificate()));
-                System.out.println("Integrity check OK? " + pkcs7.verify());
+                System.out.println("Integrity check OK? " + pkcs7.verifySignatureIntegrityAndAuthenticity());
             }
             System.out.println();
         }
@@ -86,9 +86,9 @@ public class VerifySignature {
                 System.out.println("===== " + name + " =====");
                 System.out.println("Signature covers whole document: " + signUtil.signatureCoversWholeDocument(name));
                 System.out.println("Document revision: " + signUtil.getRevision(name) + " of " + signUtil.getTotalRevisions());
-                PdfPKCS7 pkcs7 = signUtil.verifySignature(name);
+                PdfPKCS7 pkcs7 = signUtil.readSignatureData(name);
                 System.out.println("Subject: " + CertificateInfo.getSubjectFields(pkcs7.getSigningCertificate()));
-                System.out.println("Integrity check OK? " + pkcs7.verify());
+                System.out.println("Integrity check OK? " + pkcs7.verifySignatureIntegrityAndAuthenticity());
             }
             System.out.println();
         }
@@ -125,9 +125,9 @@ public class VerifySignature {
                 System.out.println("===== " + name + " =====");
                 System.out.println("Signature covers whole document: " + signUtil.signatureCoversWholeDocument(name));
                 System.out.println("Document revision: " + signUtil.getRevision(name) + " of " + signUtil.getTotalRevisions());
-                PdfPKCS7 pkcs7 = signUtil.verifySignature(name);
+                PdfPKCS7 pkcs7 = signUtil.readSignatureData(name);
                 System.out.println("Subject: " + CertificateInfo.getSubjectFields(pkcs7.getSigningCertificate()));
-                System.out.println("Integrity check OK? " + pkcs7.verify());
+                System.out.println("Integrity check OK? " + pkcs7.verifySignatureIntegrityAndAuthenticity());
             }
             System.out.println();
         }

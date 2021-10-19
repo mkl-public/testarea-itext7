@@ -175,7 +175,7 @@ public class SignTwice {
             try {
 
                 PdfReader pdfReader = new PdfReader(new ByteArrayInputStream(pdfFile));
-                PdfSigner pdfSigner = new PdfSigner(pdfReader, new FileOutputStream(destPath), true);
+                PdfSigner pdfSigner = new PdfSigner(pdfReader, new FileOutputStream(destPath), new StampingProperties().useAppendMode());
 
                 pdfSigner.signExternalContainer(externalP7DetachSignatureContainer, estimatedSize);
 

@@ -10,9 +10,7 @@ import com.google.common.base.Strings;
 import com.itextpdf.forms.PdfAcroForm;
 import com.itextpdf.forms.fields.PdfFormField;
 import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfReader;
 
 /**
@@ -31,6 +29,11 @@ public class DetermineFormFieldFonts {
      * for doing just that but as the method is protected,
      * a small trick must be used.
      * </p>
+     * <p>
+     * In the course of adjusting the test to iText 7.2.0 this
+     * implementation lost meaning as the afore mentioned method
+     * has been removed.
+     * </p>
      */
     @Test
     public void test() throws IOException {
@@ -43,24 +46,11 @@ public class DetermineFormFieldFonts {
                 PdfFormField field = entry.getValue();
                 System.out.printf("%s - %s\n", fieldName, field.getFont());
 
-                PdfFormFieldExt extField = new PdfFormFieldExt(field.getPdfObject());
-                Object[] fontAndSize = extField.getFontAndSize(field.getWidgets().get(0).getNormalAppearanceObject());
-                PdfFont font = (PdfFont) fontAndSize[0];
-                Float size = (Float) fontAndSize[1];
-                PdfName resourceName = (PdfName) fontAndSize[2];
-                System.out.printf("%s - %s - %s - %s\n", Strings.repeat(" ", fieldName.length()),
-                        font.getFontProgram().getFontNames(), size, resourceName);
+                PdfFont font = field.getFont();
+                float size = field.getFontSize();
+                System.out.printf("%s - %s - %s\n", Strings.repeat(" ", fieldName.length()),
+                        font.getFontProgram().getFontNames(), size);
             }
-        }
-    }
-
-    class PdfFormFieldExt extends PdfFormField {
-        public PdfFormFieldExt(PdfDictionary pdfObject) {
-            super(pdfObject);
-        }
-
-        public Object[] getFontAndSize(PdfDictionary asNormal) throws IOException {
-            return super.getFontAndSize(asNormal);
         }
     }
 }

@@ -9,7 +9,7 @@ import java.io.OutputStream;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
@@ -102,7 +102,7 @@ public class StampPageNumbers
         // The replacement below circumvents this over-optimization and so
         // resolves the issue.
         PdfCanvas canvas = new PdfCanvas(pdfPage.newContentStreamAfter(), pdfPage.getResources(), pdfPage.getDocument());
-        canvas.beginText().setFontAndSize(PdfFontFactory.createFont(FontConstants.HELVETICA), 22).moveText(XCOOR, YCOOR)
+        canvas.beginText().setFontAndSize(PdfFontFactory.createFont(StandardFonts.HELVETICA), 22).moveText(XCOOR, YCOOR)
                 .showText(number).endText();
 
         println("number: " + number);

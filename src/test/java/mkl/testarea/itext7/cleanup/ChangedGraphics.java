@@ -1,6 +1,3 @@
-/**
- * 
- */
 package mkl.testarea.itext7.cleanup;
 
 import java.io.File;
@@ -18,10 +15,11 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.pdfcleanup.CleanUpProperties;
 import com.itextpdf.pdfcleanup.PdfCleanUpLocation;
 import com.itextpdf.pdfcleanup.PdfCleanUpTool;
 import com.itextpdf.pdfcleanup.autosweep.ICleanupStrategy;
-import com.itextpdf.pdfcleanup.autosweep.PdfAutoSweep;
+import com.itextpdf.pdfcleanup.autosweep.PdfAutoSweepTools;
 import com.itextpdf.pdfcleanup.autosweep.RegexBasedCleanupStrategy;
 
 /**
@@ -63,7 +61,7 @@ public class ChangedGraphics {
                     ColorConstants.GRAY);
             cleanUpLocations.add(location);
 
-            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDoc, cleanUpLocations);
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDoc, cleanUpLocations, new CleanUpProperties());
             cleaner.cleanUp();
 
             pdfDoc.close();
@@ -92,7 +90,7 @@ public class ChangedGraphics {
             // contained inside the given document. If the second argument is false (that's default behavior),
             // then use PdfCleanUpTool.addCleanupLocation(PdfCleanUpLocation)
             // method to set regions to be erased from the document.
-            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDoc, true);
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDoc, true, new CleanUpProperties());
             cleaner.cleanUp();
 
             pdfDoc.close();
@@ -117,8 +115,8 @@ public class ChangedGraphics {
         try (   InputStream resource = getClass().getResourceAsStream("TEST_PDF.pdf")) {
             try (PdfDocument pdf = new PdfDocument(new PdfReader(resource), new PdfWriter(dest))) {
                 final ICleanupStrategy cleanupStrategy = new RegexBasedCleanupStrategy(Pattern.compile("2019", Pattern.CASE_INSENSITIVE)).setRedactionColor(ColorConstants.PINK);
-                final PdfAutoSweep autoSweep = new PdfAutoSweep(cleanupStrategy);
-                autoSweep.cleanUp(pdf);
+                final PdfAutoSweepTools autoSweep = new PdfAutoSweepTools(cleanupStrategy);
+                autoSweep.tentativeCleanUp(pdf);
             } catch (Exception e) {
                 System.out.println(e.toString());
             }

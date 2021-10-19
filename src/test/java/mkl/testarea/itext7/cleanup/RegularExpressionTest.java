@@ -16,7 +16,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.CharacterRenderInfo;
 import com.itextpdf.licensekey.LicenseKey;
 import com.itextpdf.pdfcleanup.autosweep.CompositeCleanupStrategy;
-import com.itextpdf.pdfcleanup.autosweep.PdfAutoSweep;
+import com.itextpdf.pdfcleanup.autosweep.PdfAutoSweepTools;
 import com.itextpdf.pdfcleanup.autosweep.RegexBasedCleanupStrategy;
 
 /**
@@ -63,8 +63,8 @@ public class RegularExpressionTest {
             
             PdfDocument pdf = new PdfDocument(new PdfReader(resource), writer);
             // sweep
-            PdfAutoSweep pdfAutoSweep = new PdfAutoSweep(strategy);
-            pdfAutoSweep.cleanUp(pdf);
+            PdfAutoSweepTools pdfAutoSweep = new PdfAutoSweepTools(strategy);
+            pdfAutoSweep.tentativeCleanUp(pdf);
             pdf.close();
         }
     }

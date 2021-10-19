@@ -1,5 +1,7 @@
 package mkl.testarea.itext7.merge;
 
+import static com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,9 +45,9 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.font.FontProvider;
-import com.itextpdf.layout.property.HorizontalAlignment;
-import com.itextpdf.layout.property.TextAlignment;
-import com.itextpdf.layout.property.UnitValue;
+import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 
 /**
  * @author mkl
@@ -111,13 +113,13 @@ public class InsertInSpace {
             for (String font : fonts) {
                 FontProgram fontProgram = FontProgramFactory.createFont(font);
                 if (font.endsWith("TREBUC.TTF")) {
-                    pdfFontMap.put("NORMAL", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, true));
+                    pdfFontMap.put("NORMAL", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, PREFER_EMBEDDED));
                 } else if (font.endsWith("TREBUCBD.TTF")) {
-                    pdfFontMap.put("BOLD", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, true));
+                    pdfFontMap.put("BOLD", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, PREFER_EMBEDDED));
                 } else if (font.endsWith("TREBUCBI.TTF")) {
-                    pdfFontMap.put("BOLD_ITALIC", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, true));
+                    pdfFontMap.put("BOLD_ITALIC", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, PREFER_EMBEDDED));
                 } else if (font.endsWith("TREBUCIT.TTF")) {
-                    pdfFontMap.put("ITALIC", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, true));
+                    pdfFontMap.put("ITALIC", PdfFontFactory.createFont(fontProgram, PdfEncodings.WINANSI, PREFER_EMBEDDED));
                 }
 
                 fontProvider.addFont(fontProgram);
@@ -165,7 +167,7 @@ public class InsertInSpace {
             PdfPage page = docEvent.getPage();
             Rectangle pageSize = page.getPageSize();
             PdfCanvas pdfCanvas = new PdfCanvas(page.getLastContentStream(), page.getResources(), pdf);
-            Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
+            Canvas canvas = new Canvas(pdfCanvas, pageSize);
             canvas.setFontSize(10f);
             Table table = new Table(3);
             table.setBorder(Border.NO_BORDER);
@@ -264,7 +266,7 @@ public class InsertInSpace {
             PdfPage page = docEvent.getPage();
             Rectangle pageSize = page.getPageSize();
             PdfCanvas pdfCanvas = new PdfCanvas(page.getLastContentStream(), page.getResources(), pdf);
-            Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
+            Canvas canvas = new Canvas(pdfCanvas, pageSize);
             Image img;
             try {
                 img = new Image(ImageDataFactory.create(bar));

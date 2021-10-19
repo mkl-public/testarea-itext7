@@ -71,7 +71,7 @@ public class AddRotatedAnnotation
             PdfFormXObject xObj = new PdfFormXObject(new Rectangle(iHeight, iWidth));
             PdfCanvas canvas = new PdfCanvas(xObj, pdfDocument);
             // Insert image using rotation transformation matrix
-            canvas.addImage(imageData, 0, iWidth, -iHeight, 0, iHeight, 0);
+            canvas.addImageWithTransformationMatrix(imageData, 0, iWidth, -iHeight, 0, iHeight, 0);
             stamp.setNormalAppearance(xObj.getPdfObject());
 
             stamp.put(PdfName.Type, PdfName.Annot);
@@ -118,7 +118,7 @@ public class AddRotatedAnnotation
             xObj.put(PdfName.Matrix, new PdfArray(new int[]{0, 1, -1, 0, 0, 0}));
             PdfCanvas canvas = new PdfCanvas(xObj, pdfDocument);
             // Insert upright image
-            canvas.addImage(imageData, 0, 0, iWidth, false);
+            canvas.addImageWithTransformationMatrix(imageData, iWidth, 0, 0, iHeight, 0, 0);
             stamp.setNormalAppearance(xObj.getPdfObject());
 
             stamp.put(PdfName.Type, PdfName.Annot);

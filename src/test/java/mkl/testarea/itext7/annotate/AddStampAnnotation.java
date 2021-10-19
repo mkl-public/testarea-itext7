@@ -73,7 +73,7 @@ public class AddStampAnnotation
 
             PdfFormXObject xObj = new PdfFormXObject(new Rectangle(iWidth, iHeight));
             PdfCanvas canvas = new PdfCanvas(xObj, pdfDocument);
-            canvas.addImage(imageData, 0, 0, iWidth, false);
+            canvas.addImageWithTransformationMatrix(imageData, iWidth, 0, 0, iHeight, 0, 0);
             stamp.setNormalAppearance(xObj.getPdfObject());
 
             stamp.put(PdfName.Type, PdfName.Annot);

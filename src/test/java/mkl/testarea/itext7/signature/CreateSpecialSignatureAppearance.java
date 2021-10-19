@@ -26,6 +26,7 @@ import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Canvas;
@@ -87,6 +88,7 @@ public class CreateSpecialSignatureAppearance {
      */
     @Test
     public void testColorizeLayer2Text() throws IOException, GeneralSecurityException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        StampingProperties stampingProperties = new StampingProperties();
         boolean isAppendMode = false;
         int certificationLevel = PdfSigner.NOT_CERTIFIED;
         String reason = "Just another illusionary reason";
@@ -101,7 +103,7 @@ public class CreateSpecialSignatureAppearance {
         try (   InputStream resource = getClass().getResourceAsStream("/mkl/testarea/itext7/content/test.pdf");
                 OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "test-signed-colored-text.pdf"))) {
             PdfReader reader = new PdfReader(resource);
-            PdfSigner signer = new PdfSigner(reader, result, isAppendMode);
+            PdfSigner signer = new PdfSigner(reader, result, stampingProperties);
 
             signer.setCertificationLevel(certificationLevel);
 
@@ -155,7 +157,7 @@ public class CreateSpecialSignatureAppearance {
         try (   InputStream inStream = getClass().getResourceAsStream("/mkl/testarea/itext7/content/test.pdf");
                 OutputStream pdfos = new FileOutputStream(new File(RESULT_FOLDER, "test-signed-styled-text.pdf"))) {
             PdfReader reader = new PdfReader(inStream);
-            PdfSigner signer = new PdfSigner(reader, pdfos, false);
+            PdfSigner signer = new PdfSigner(reader, pdfos, new StampingProperties());
 
             int noOfPages = signer.getDocument().getNumberOfPages();
             PdfSignatureAppearance appearance = signer.getSignatureAppearance().setReason(reason).setLocation(loc)
@@ -188,12 +190,12 @@ public class CreateSpecialSignatureAppearance {
             Rectangle signatureRect = new Rectangle(MARGIN, MARGIN, rect.getWidth() / 2 - 2 * MARGIN, rect.getHeight() - 2 * MARGIN);
 
 // using different, customized font sizes 
-            try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), signatureRect);) {
+            try (Canvas layoutCanvas = new Canvas(canvas, signatureRect);) {
                 Paragraph paragraph = new Paragraph(name).setFont(font).setMargin(0).setMultipliedLeading(0.9f).setFontSize(20);
                 layoutCanvas.add(paragraph);
             }
 
-            try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
+            try (Canvas layoutCanvas = new Canvas(canvas, dataRect);) {
                 Paragraph paragraph = new Paragraph().setFont(font).setMargin(0).setMultipliedLeading(0.9f);
                 paragraph.add(new Text("Digitally signed by ").setFontSize(6));
                 paragraph.add(new Text(name + '\n').setFontSize(9));

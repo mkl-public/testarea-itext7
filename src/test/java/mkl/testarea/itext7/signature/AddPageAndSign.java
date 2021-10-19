@@ -21,6 +21,7 @@ import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.xmp.XMPException;
 import com.itextpdf.signatures.DigestAlgorithms;
 import com.itextpdf.signatures.ICrlClient;
@@ -107,7 +108,7 @@ public class AddPageAndSign
         }
         int pageCount = document.getNumberOfPages();
         document.close();
-        PdfSigner signer = new PdfSigner(new PdfReader(dest + "_temp"), new FileOutputStream(dest), true);
+        PdfSigner signer = new PdfSigner(new PdfReader(dest + "_temp"), new FileOutputStream(dest), new StampingProperties().useAppendMode());
         // Creating the appearance
         if (initial == true)
         {

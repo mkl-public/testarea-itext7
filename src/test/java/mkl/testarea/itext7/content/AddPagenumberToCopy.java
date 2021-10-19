@@ -113,7 +113,7 @@ public class AddPagenumberToCopy {
             source.copyPagesTo(oldC, oldC, target);
             PdfPage newPage = target.getLastPage();
             Rectangle pageSize = newPage.getCropBox();
-            try (   Canvas canvas = new Canvas(new PdfCanvas(newPage, true), target, pageSize)  ) {
+            try (   Canvas canvas = new Canvas(new PdfCanvas(newPage, true), pageSize)  ) {
                 canvas.add(new Paragraph(text).setBorder(new SolidBorder(ColorConstants.RED, 1))
                       .setFixedPosition(number++, pageSize.getWidth() - 55, pageSize.getHeight() - 30, 50));
             }

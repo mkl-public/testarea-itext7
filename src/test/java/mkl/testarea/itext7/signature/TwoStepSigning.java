@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.BouncyCastleDigest;
 import com.itextpdf.signatures.DigestAlgorithms;
 import com.itextpdf.signatures.IExternalSignatureContainer;
@@ -66,7 +67,7 @@ public class TwoStepSigning
             String hashAlgorithm = "SHA-256";
 
             PdfReader reader = new PdfReader(resource);
-            PdfSigner signer = new PdfSigner(reader, os, false);
+            PdfSigner signer = new PdfSigner(reader, os, new StampingProperties());
             signer.setFieldName("certification"); // this field already exists
             signer.setCertificationLevel(PdfSigner.CERTIFIED_FORM_FILLING);
             PdfSignatureAppearance sap = signer.getSignatureAppearance();
@@ -78,7 +79,7 @@ public class TwoStepSigning
             PreSignatureContainer external = new PreSignatureContainer(PdfName.Adobe_PPKLite,PdfName.Adbe_pkcs7_detached);
             signer.signExternalContainer(external, 8192);
             byte[] hash=external.getHash();
-            sgn.getAuthenticatedAttributeBytes(hash, null, null,PdfSigner.CryptoStandard.CMS);
+            sgn.getAuthenticatedAttributeBytes(hash, PdfSigner.CryptoStandard.CMS, null, null);
         }
     }
 

@@ -1,4 +1,5 @@
 package mkl.testarea.itext7.content;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.Style;
 import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
 
 /**
  * @author mkl

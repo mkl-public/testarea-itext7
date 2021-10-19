@@ -125,7 +125,7 @@ public class PdfTestSigner {
                     if (!compress) {
                         writer = new PdfWriter(writer.getOutputStream()) {
                             @Override
-                            protected void flushObject(PdfObject pdfObject, boolean canBeInObjStm) throws IOException {
+                            protected void flushObject(PdfObject pdfObject, boolean canBeInObjStm) {
                                 super.flushObject(pdfObject, false);
                             }
                         };

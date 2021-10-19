@@ -143,7 +143,7 @@ public class CreateDSS1376TestCases {
         String digestAlgorithm = "SHA512";
 
         PdfReader reader = new PdfReader(original);
-        PdfSigner signer = new PdfSigner(reader, result, isAppendMode);
+        PdfSigner signer = new PdfSigner(reader, result, isAppendMode ? new StampingProperties().useAppendMode() : new StampingProperties());
 
         signer.setCertificationLevel(certificationLevel);
 

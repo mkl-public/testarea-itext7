@@ -49,7 +49,7 @@ import org.bouncycastle.x509.util.StreamParsingException;
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.io.source.ByteBuffer;
 import com.itextpdf.io.util.StreamUtil;
-import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.CompressionConstants;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfCatalog;
@@ -66,6 +66,7 @@ import com.itextpdf.signatures.IOcspClient;
 import com.itextpdf.signatures.PdfPKCS7;
 import com.itextpdf.signatures.PdfSignature;
 import com.itextpdf.signatures.SignatureUtil;
+import com.itextpdf.signatures.exceptions.SignExceptionMessageConstant;
 
 /**
  * <a href="https://stackoverflow.com/questions/51370965/how-can-i-add-pades-ltv-using-itext">
@@ -105,7 +106,7 @@ public class AdobeLtvEnabling {
 
         List<String> names = signatureUtil.getSignatureNames();
         for (String name : names) {
-            PdfPKCS7 pdfPKCS7 = signatureUtil.verifySignature(name, BouncyCastleProvider.PROVIDER_NAME);
+            PdfPKCS7 pdfPKCS7 = signatureUtil.readSignatureData(name, BouncyCastleProvider.PROVIDER_NAME);
             PdfSignature sig = signatureUtil.getSignature(name);
             List<X509Certificate> certificatesToCheck = new ArrayList<>();
             certificatesToCheck.add(pdfPKCS7.getSigningCertificate());
@@ -327,7 +328,7 @@ public class AdobeLtvEnabling {
         if (url != null && url.length() > 0) {
             HttpURLConnection con = (HttpURLConnection)new URL(url).openConnection();
             if (con.getResponseCode() / 100 != 2) {
-                throw new PdfException(PdfException.InvalidHttpResponse1).setMessageParams(con.getResponseCode());
+                throw new PdfException(SignExceptionMessageConstant.INVALID_HTTP_RESPONSE).setMessageParams(con.getResponseCode());
             }
             InputStream inp = (InputStream) con.getContent();
             X509CertParser parser = new X509CertParser();

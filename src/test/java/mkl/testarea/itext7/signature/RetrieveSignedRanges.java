@@ -49,7 +49,7 @@ public class RetrieveSignedRanges {
                 PdfSignature signature = signatureUtil.getSignature(name);
                 PdfArray b = signature.getByteRange();
                 RandomAccessFileOrArray rf = pdfReader.getSafeFile();
-                try (   InputStream rg = new RASInputStream(new RandomAccessSourceFactory().createRanged(rf.createSourceView(), SignatureUtil.asLongArray(b)));
+                try (   InputStream rg = new RASInputStream(new RandomAccessSourceFactory().createRanged(rf.createSourceView(), b.toLongArray()));
                         OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "BLANK-signed-ranges-" + name + ".bin"));) {
                     byte[] buf = new byte[8192];
                     int rd;

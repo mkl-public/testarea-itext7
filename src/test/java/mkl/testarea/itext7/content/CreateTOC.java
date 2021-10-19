@@ -40,9 +40,9 @@ import com.itextpdf.layout.element.TabStop;
 import com.itextpdf.layout.hyphenation.HyphenationConfig;
 import com.itextpdf.layout.layout.LayoutContext;
 import com.itextpdf.layout.layout.LayoutResult;
-import com.itextpdf.layout.property.AreaBreakType;
-import com.itextpdf.layout.property.TabAlignment;
-import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.properties.AreaBreakType;
+import com.itextpdf.layout.properties.TabAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.renderer.ParagraphRenderer;
 
 /**
@@ -274,7 +274,7 @@ public class CreateTOC
             Rectangle pageSize = page.getPageSize();
             PdfCanvas pdfCanvas = new PdfCanvas(
                 page.newContentStreamBefore(), page.getResources(), pdf);
-            Canvas canvas = new Canvas(pdfCanvas, pdf, pageSize);
+            Canvas canvas = new Canvas(pdfCanvas, pageSize);
             Paragraph p = new Paragraph().add("Page ").add(String.valueOf(pageNumber + offset)).add(" of"); // <<<
 
             canvas.showTextAligned(p, x, y, TextAlignment.RIGHT);
