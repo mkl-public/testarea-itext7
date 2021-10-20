@@ -16,6 +16,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.itextpdf.forms.PdfAcroForm;
+import com.itextpdf.forms.fields.PdfFormField;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.BouncyCastleDigest;
@@ -78,6 +80,37 @@ public class SignWithAdaptions {
                     sig.setName("A Custom Signer");
                 }
             });
+
+            IExternalSignature pks = new PrivateKeySignature(pk, "SHA256", BouncyCastleProvider.PROVIDER_NAME);
+            pdfSigner.signDetached(new BouncyCastleDigest(), pks, chain, null, null, null, 0, CryptoStandard.CMS);
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/69625369/signature-field-remain-unsigned-after-the-signing">
+     * Signature field remain unsigned after the signing
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1yJZsnAbD2yytHqp-y0Xg7b6hPCnj0_-Q/view?usp=sharing">
+     * test.pdf
+     * </a> as "Fda1571.pdf"
+     * <p>
+     * This test illustrates how to sign a signature visibly in a form field
+     * that is set hidden.
+     * </p>
+     */
+    @Test
+    public void testFda1571() throws IOException, GeneralSecurityException {
+        try (   InputStream resource = getClass().getResourceAsStream("Fda1571.pdf");
+                PdfReader pdfReader = new PdfReader(resource)) {
+            pdfReader.setUnethicalReading(true);
+            PdfSigner pdfSigner = new PdfSigner(pdfReader,
+                    new FileOutputStream(new File(RESULT_FOLDER, "Fda1571-signedWithoutHidden.pdf")),
+                    new StampingProperties());
+            pdfSigner.setFieldName("signature1");
+            PdfAcroForm.getAcroForm(pdfSigner.getDocument(), false)
+                .getField("signature1")
+                .setVisibility(PdfFormField.VISIBLE);
 
             IExternalSignature pks = new PrivateKeySignature(pk, "SHA256", BouncyCastleProvider.PROVIDER_NAME);
             pdfSigner.signDetached(new BouncyCastleDigest(), pks, chain, null, null, null, 0, CryptoStandard.CMS);
