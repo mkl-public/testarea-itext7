@@ -26,10 +26,12 @@ public class PdfRevisionCompare extends PdfCompare {
                 }
                 String previousRevision = signatureNames.get(0);
                 PdfDocument previousDocument = new PdfDocument(new PdfReader(signatureUtil.extractRevision(previousRevision)));
+                new SignatureUtil(previousDocument).getSignatureNames(); // to mark signature values as unencrypted
                 System.out.printf("* Initial signed revision: %s\n", previousRevision);
                 for (int i = 1; i < signatureNames.size(); i++) {
                     String currentRevision = signatureNames.get(i);
                     PdfDocument currentDocument = new PdfDocument(new PdfReader(signatureUtil.extractRevision(currentRevision)));
+                    new SignatureUtil(currentDocument).getSignatureNames(); // to mark signature values as unencrypted
                     showDifferences(previousDocument, currentDocument);
                     System.out.printf("* Next signed revision (%d): %s\n", i+1, currentRevision);
                     previousDocument.close();
