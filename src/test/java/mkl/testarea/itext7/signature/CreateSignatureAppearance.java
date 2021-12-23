@@ -24,11 +24,14 @@ import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.io.util.StreamUtil;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.AffineTransform;
 import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
@@ -493,4 +496,69 @@ public class CreateSignatureAppearance {
             pdfSigner.signDetached(new BouncyCastleDigest(), pks, chain, null, null, null, 0, CryptoStandard.CMS);
         }
     }
+
+    /**
+     * This test illustrates an issue in the {@link PdfSignatureAppearance#setReuseAppearance(boolean) ReuseAppearance}
+     * feature of iText: Here the complete normal appearance of the unsigned field is re-used as n0 layer of the signed
+     * field. Unfortunately it was forgotten that the original appearance was displayed so that its BBox transformed by
+     * its matrix fits into the annotation rectangle. If BBox of the original appearance does not have its lower left
+     * corner in the origin or its matrix is not the identity, therefore, the re-used appearance usually is displayed in
+     * differently if at all.
+     */
+    @Test
+    public void testReuseSpecialAppearance() throws IOException, GeneralSecurityException {
+        File emptySignatureFile = createSpecialEmptySignatureField();
+
+        try (   PdfReader pdfReader = new PdfReader(emptySignatureFile);
+                OutputStream result = new FileOutputStream(new File(RESULT_FOLDER, "specialEmptySignatureField-signed.pdf")) ) {
+            PdfSigner pdfSigner = new PdfSigner(pdfReader, result, new StampingProperties());
+            pdfSigner.setFieldName("Signature");
+
+            PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+            appearance.setRenderingMode(RenderingMode.NAME_AND_DESCRIPTION);
+            appearance.setReason("Specimen");
+            appearance.setLocation("Boston");
+            appearance.setCertificate(chain[0]);
+            appearance.setLayer2FontColor(ColorConstants.LIGHT_GRAY);
+            appearance.setReuseAppearance(true);
+
+            IExternalSignature pks = new PrivateKeySignature(pk, "SHA256", BouncyCastleProvider.PROVIDER_NAME);
+            pdfSigner.signDetached(new BouncyCastleDigest(), pks, chain, null, null, null, 0, CryptoStandard.CMS);
+        }
+    }
+
+    File createSpecialEmptySignatureField() throws IOException {
+        File emptySignatureFile = new File(RESULT_FOLDER, "specialEmptySignatureField.pdf");
+        try (   PdfDocument pdfDocument = new PdfDocument(new PdfWriter(emptySignatureFile))) {
+            PdfSignatureFormField field = PdfFormField.createSignature(pdfDocument, new Rectangle(100, 600, 300, 100));
+            field.setFieldName("Signature");
+            createSpecialAppearance(field, pdfDocument);
+            PdfAcroForm.getAcroForm(pdfDocument, true).addField(field, pdfDocument.addNewPage());
+        }
+        return emptySignatureFile;
+    }
+    
+
+    void createSpecialAppearance(PdfSignatureFormField field, PdfDocument pdfDocument) throws IOException {
+        PdfWidgetAnnotation widget = field.getWidgets().get(0);
+        Rectangle rectangle = field.getWidgets().get(0).getRectangle().toRectangle();
+        rectangle = new Rectangle(-rectangle.getWidth()/4, -rectangle.getHeight()/4, rectangle.getWidth(), rectangle.getHeight());
+        PdfFormXObject xObject = new PdfFormXObject(rectangle);
+        xObject.makeIndirect(pdfDocument);
+        float[] matrix = new float[6];
+        AffineTransform.getRotateInstance(Math.PI / 4).getMatrix(matrix);
+        xObject.getPdfObject().put(PdfName.Matrix, new PdfArray(matrix));
+        PdfCanvas canvas = new PdfCanvas(xObject, pdfDocument);
+        try (   InputStream imageResource = getClass().getResourceAsStream("Binary - Light Gray.png")    ) {
+            ImageData data = ImageDataFactory.create(StreamUtil.inputStreamToArray(imageResource));
+            canvas.addImageFittedIntoRectangle(data, rectangle, false);
+        }
+        canvas.setFillColorGray(0);
+        canvas.setFontAndSize(PdfFontFactory.createFont(), rectangle.getHeight()/2);
+        canvas.beginText();
+        canvas.showText("Test");
+        canvas.endText();
+        widget.setNormalAppearance(xObject.getPdfObject());
+    }
+
 }
