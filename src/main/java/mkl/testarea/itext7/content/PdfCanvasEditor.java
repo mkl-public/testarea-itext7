@@ -108,11 +108,18 @@ public class PdfCanvasEditor extends PdfCanvasProcessor
     }
 
     //
-    // constructor giving the parent a dummy listener to talk to 
+    // constructors
     //
+    /** giving the parent a dummy listener to talk to */
     public PdfCanvasEditor()
     {
-        super(new DummyEventListener());
+        this(new DummyEventListener());
+    }
+
+    /** giving the parent a custom listener to talk to */
+    public PdfCanvasEditor(IEventListener listener)
+    {
+        super(listener);
     }
 
     //
