@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -15,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfOutline;
@@ -132,4 +134,118 @@ public class MultipleSignaturesAndTagging {
         }
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/70889989/pdf-signature-invalidates-existing-signature-in-acrobat-reader">
+     * Pdf signature invalidates existing signature in Acrobat Reader
+     * </a>
+     * <br/>
+     * <a href="https://easyupload.io/99fk3a">
+     * test.pdf
+     * </a> as "testManuel.pdf"
+     * <p>
+     * This reproduces the OP's issue in a single test method in Java.
+     * Just like the OP's .NET project and just like the test method
+     * {@link #testSignSimpleTaggedPdfOutlineTwiceCms()} above, the
+     * result with two signatures in Adobe Reader is negatively validated.
+     * The reason again is a change in the structure tree in combination
+     * with an outline entry pointing there.
+     * </p>
+     * 
+     * @see #testSignTestManuelTwiceNoTag()
+     */
+    @Test
+    public void testSignTestManuelTwice() throws IOException, GeneralSecurityException {
+        File signedOnce = new File(RESULT_FOLDER, "testManuel-signed.pdf");
+        File signedTwice = new File(RESULT_FOLDER, "testManuel-signed-signed.pdf");
+
+        try (   InputStream resource = getClass().getResourceAsStream("testManuel.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                FileOutputStream os = new FileOutputStream(signedOnce)  ) {
+            PdfSigner pdfSigner = new PdfSigner(pdfReader, os, new StampingProperties().useAppendMode());
+            pdfSigner.setFieldName("FirstSignature");
+            PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+            appearance.setPageNumber(1);
+            appearance.setPageRect(new Rectangle(30, 700, 200, 100));
+
+            IExternalDigest digest = new BouncyCastleDigest();
+            IExternalSignature signature = new PrivateKeySignature(pk, DigestAlgorithms.SHA256, null);
+            pdfSigner.signDetached(digest, signature, chain, null, null, null, 0, CryptoStandard.CMS);
+        }
+
+        try (   PdfReader pdfReader = new PdfReader(signedOnce);
+                FileOutputStream os = new FileOutputStream(signedTwice)  ) {
+            PdfSigner pdfSigner = new PdfSigner(pdfReader, os, new StampingProperties().useAppendMode());
+            pdfSigner.setFieldName("SecondSignature");
+            PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+            appearance.setPageNumber(1);
+            appearance.setPageRect(new Rectangle(230, 700, 200, 100));
+
+            IExternalDigest digest = new BouncyCastleDigest();
+            IExternalSignature signature = new PrivateKeySignature(pk, DigestAlgorithms.SHA256, null);
+            pdfSigner.signDetached(digest, signature, chain, null, null, null, 0, CryptoStandard.CMS);
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/70889989/pdf-signature-invalidates-existing-signature-in-acrobat-reader">
+     * Pdf signature invalidates existing signature in Acrobat Reader
+     * </a>
+     * <br/>
+     * <a href="https://easyupload.io/99fk3a">
+     * test.pdf
+     * </a> as "testManuel.pdf"
+     * <p>
+     * This reproduces the OP's issue in a single test method in Java
+     * except in one detail: structure tree manipulation during the
+     * second signature creation is prevented. And in contrast to
+     * {@link #testSignTestManuelTwice()} (which reproduces the OP's
+     * .NET project behavior), the result with two signatures in Adobe
+     * Reader is positively validated.
+     * </p>
+     * 
+     * @see #testSignTestManuelTwice()
+     */
+    @Test
+    public void testSignTestManuelTwiceNoTag() throws IOException, GeneralSecurityException {
+        File signedOnce = new File(RESULT_FOLDER, "testManuel-signed-noTag.pdf");
+        File signedTwice = new File(RESULT_FOLDER, "testManuel-signed-signed-noTag.pdf");
+
+        try (   InputStream resource = getClass().getResourceAsStream("testManuel.pdf");
+                PdfReader pdfReader = new PdfReader(resource);
+                FileOutputStream os = new FileOutputStream(signedOnce)  ) {
+            PdfSigner pdfSigner = new PdfSigner(pdfReader, os, new StampingProperties().useAppendMode());
+            pdfSigner.setFieldName("FirstSignature");
+            PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+            appearance.setPageNumber(1);
+            appearance.setPageRect(new Rectangle(30, 700, 200, 100));
+
+            IExternalDigest digest = new BouncyCastleDigest();
+            IExternalSignature signature = new PrivateKeySignature(pk, DigestAlgorithms.SHA256, null);
+            pdfSigner.signDetached(digest, signature, chain, null, null, null, 0, CryptoStandard.CMS);
+        }
+
+        try (   PdfReader pdfReader = new PdfReader(signedOnce);
+                FileOutputStream os = new FileOutputStream(signedTwice)  ) {
+            PdfSigner pdfSigner = new PdfSigner(pdfReader, os, new StampingProperties().useAppendMode()) {
+                @Override
+                protected PdfDocument initDocument(PdfReader reader, PdfWriter writer, StampingProperties properties) {
+                    return new PdfDocument(reader, writer, properties) {
+                        @Override
+                        protected void tryInitTagStructure(PdfDictionary str) {
+                            structTreeRoot = null;
+                            structParentIndex = -1;
+                        }
+                    };
+                }
+            };
+            pdfSigner.setFieldName("SecondSignature");
+            PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+            appearance.setPageNumber(1);
+            appearance.setPageRect(new Rectangle(230, 700, 200, 100));
+
+            IExternalDigest digest = new BouncyCastleDigest();
+            IExternalSignature signature = new PrivateKeySignature(pk, DigestAlgorithms.SHA256, null);
+            pdfSigner.signDetached(digest, signature, chain, null, null, null, 0, CryptoStandard.CMS);
+        }
+    }
 }
