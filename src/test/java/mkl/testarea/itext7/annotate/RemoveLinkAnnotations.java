@@ -98,11 +98,13 @@ public class RemoveLinkAnnotations {
                         if (annot.getSubtype().equals(PdfName.Link)) {
                             PdfDictionary annotAction = ((PdfLinkAnnotation) annot).getAction();
 
-                            if (annotAction.get(PdfName.S).equals(PdfName.URI)
-                                    || annotAction.get(PdfName.S).equals(PdfName.GoToR)) {
-                                PdfString uri = annotAction.getAsString(PdfName.URI);
-                                System.out.println("Removing " + uri.toString());
-                                pdfPage.removeAnnotation(annot);
+                            if (annotAction != null) {
+                                if (annotAction.get(PdfName.S).equals(PdfName.URI)
+                                        || annotAction.get(PdfName.S).equals(PdfName.GoToR)) {
+                                    PdfString uri = annotAction.getAsString(PdfName.URI);
+                                    System.out.println("Removing " + uri.toString());
+                                    pdfPage.removeAnnotation(annot);
+                                }
                             }
                         }
                     }
