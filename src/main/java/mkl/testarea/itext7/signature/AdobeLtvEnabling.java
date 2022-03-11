@@ -261,12 +261,14 @@ public class AdobeLtvEnabling {
     static PdfName getSignatureHashKey(PdfSignature sig) throws NoSuchAlgorithmException, IOException {
         PdfString contents = sig.getContents();
         byte[] bc = PdfEncodings.convertToBytes(contents.getValue(), null);
+        /*
         if (PdfName.ETSI_RFC3161.equals(sig.getSubFilter())) {
             try (   ASN1InputStream din = new ASN1InputStream(new ByteArrayInputStream(bc)) ) {
                 ASN1Primitive pkcs = din.readObject();
                 bc = pkcs.getEncoded();
             }
         }
+        */
         byte[] bt = hashBytesSha1(bc);
         return new PdfName(convertToHex(bt));
     }
