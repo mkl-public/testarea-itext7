@@ -85,6 +85,24 @@ public class SignLikeNikhil {
         chain = ks.getCertificateChain(alias);
     }
 
+    /**
+     * <a href="https://stackoverflow.com/questions/72578658/invalidating-the-signature-when-the-pdf-contains-image-but-works-fine-without-t">
+     * Invalidating the signature when the pdf contains image, but works fine without the image in itext
+     * </a>
+     * <br/>
+     * <a href="https://github.com/nikhilkpuhran/sample/blob/master/761bd204dcbd42a6ac7a03cbd77b86f5signed.pdf">
+     * 761bd204dcbd42a6ac7a03cbd77b86f5signed.pdf
+     * </a> without signing revision as "761bd204dcbd42a6ac7a03cbd77b86f5.pdf"
+     * <p>
+     * This test makes Nikhil's code in his class
+     * <a href="https://github.com/nikhilkpuhran/sample/blob/master/PDFServiceImpl.java">PDFServiceImpl</a>
+     * runnable without all the unknown external dependencies.
+     * </p>
+     * <p>
+     * In the end, though, I cannot reproduce the issue, Adobe does not report
+     * that the document has been altered or corrupted.
+     * </p>
+     */
     @Test
     public void testSignLikeNikhil() throws IOException, GeneralSecurityException, DecoderException, OperatorException, CMSException {
         String pdfName = "761bd204dcbd42a6ac7a03cbd77b86f5";
