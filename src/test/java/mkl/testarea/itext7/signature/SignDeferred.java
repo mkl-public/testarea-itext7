@@ -1,10 +1,25 @@
 package mkl.testarea.itext7.signature;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.Security;
+import java.security.Signature;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.util.Enumeration;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,8 +29,13 @@ import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.io.source.ByteArrayOutputStream;
 import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.element.Cell;
@@ -23,6 +43,16 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.signatures.BouncyCastleDigest;
+import com.itextpdf.signatures.DigestAlgorithms;
+import com.itextpdf.signatures.ExternalBlankSignatureContainer;
+import com.itextpdf.signatures.IExternalDigest;
+import com.itextpdf.signatures.IExternalSignature;
+import com.itextpdf.signatures.IExternalSignatureContainer;
+import com.itextpdf.signatures.PdfPKCS7;
+import com.itextpdf.signatures.PdfSignatureAppearance;
+import com.itextpdf.signatures.PdfSigner;
+import com.itextpdf.signatures.PdfSigner.CryptoStandard;
 
 /**
  * @author mkl
@@ -30,11 +60,26 @@ import com.itextpdf.layout.properties.TextAlignment;
 public class SignDeferred {
     final static File RESULT_FOLDER = new File("target/test-outputs", "signature");
 
+    final static String path = "keystores/demo-rsa2048.p12";
+    final static char[] pass = "demo-rsa2048".toCharArray();
+    static PrivateKey pk;
+    static Certificate[] chain;
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         RESULT_FOLDER.mkdirs();
         BouncyCastleProvider provider = new BouncyCastleProvider();
         Security.addProvider(provider);
+
+        KeyStore ks = KeyStore.getInstance("pkcs12", "SunJSSE");
+        ks.load(new FileInputStream(path), pass);
+        String alias = "";
+        Enumeration<String> aliases = ks.aliases();
+        while (alias.equals("demo") == false && aliases.hasMoreElements()) {
+            alias = aliases.nextElement();
+        }
+        pk = (PrivateKey) ks.getKey(alias, pass);
+        chain = ks.getCertificateChain(alias);
     }
 
     /**
@@ -163,4 +208,131 @@ public class SignDeferred {
             return baos.toByteArray();
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/71597066/how-to-get-cms-pkcs7-from-pkcs1-zeal-id-integration">
+     * How to get CMS (PKCS#7) from PKCS#1 Zeal id integration
+     * </a>
+     * <p>
+     * The OP does not consider doing all the signing service related stuff in the <code>sign</code>
+     * method of an {@link IExternalSignature} implementation an option. Instead he prefers to go for
+     * deferred signing. In this context the need came up to create PAdES compatible CMS signature
+     * containers using {@link PdfPKCS7}. This test does so in a deferred use case. 
+     * </p>
+     * @see #prepareSignature(InputStream, ByteArrayOutputStream)
+     * @see PreSignatureContainer
+     * @see #createSignature(InputStream, String)
+     * @see ExternalPrecalculatedSignatureContainer
+     */
+    @Test
+    public void testSignLikeGovindB() throws Exception {
+        try (
+            InputStream resource = getClass().getResourceAsStream("/mkl/testarea/itext7/content/test.pdf");
+            ByteArrayOutputStream preparedArrayStream = new ByteArrayOutputStream()
+        ) {
+            IExternalDigest externalDigest = new BouncyCastleDigest();
+            String digestAlgorithm = "SHA256";
+
+            // deferred signing, step one
+            String base64DocumentHash = prepareSignature(resource, preparedArrayStream);
+            // prepare PdfPKCS7 with document hash
+            byte[] hash = Base64.decodeBase64(base64DocumentHash);
+            PdfPKCS7 sgn = new PdfPKCS7((PrivateKey) null, chain, digestAlgorithm, null, externalDigest, false);
+            byte[] sh = sgn.getAuthenticatedAttributeBytes(hash, CryptoStandard.CADES, null, null);
+            // retrieve signature bytes
+            Signature sig = Signature.getInstance("SHA256withRSA");
+            sig.initSign(pk);
+            sig.update(sh);
+            byte[] extSignature = sig.sign();
+            // finalize PdfPKCS7 with signature bytes
+            sgn.setExternalDigest(extSignature, null, "RSA");
+            byte[] encodedSig = sgn.getEncodedPKCS7(hash, CryptoStandard.CADES, null, null, null);
+            // deferred signing, step two
+            try (ByteArrayInputStream preparedInputStream = new ByteArrayInputStream(preparedArrayStream.toByteArray())) {
+                createSignature(preparedInputStream , Base64.encodeBase64String(encodedSig));
+            }
+        }
+    }
+
+    /** @see #testSignLikeGovindB() */
+    static String prepareSignature(InputStream in, ByteArrayOutputStream preparedArrayStream) throws IOException, GeneralSecurityException {
+        PdfReader reader = new PdfReader(in);
+        Rectangle rect = new Rectangle(36, 648, 200, 100);
+        PdfSigner signer = new PdfSigner(reader, preparedArrayStream,  new StampingProperties().useAppendMode());
+
+        PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+        appearance.setPageRect(rect)
+                  .setPageNumber(1)
+                  .setLocation("EU")
+                  .setReason("Test");
+        signer.setFieldName("testing");
+
+        PreSignatureContainer external = new PreSignatureContainer(PdfName.Adobe_PPKLite, PdfName.ETSI_CAdES_DETACHED);
+
+        signer.signExternalContainer(external, 8192);
+        String hash = Base64.encodeBase64String(external.getHash());
+        return hash;
+    }
+
+    /** @see #testSignLikeGovindB() */
+    static class PreSignatureContainer implements IExternalSignatureContainer {
+        private PdfDictionary sigDic;
+        private byte hash[];
+
+        public PreSignatureContainer(PdfName filter, PdfName subFilter) {
+            sigDic = new PdfDictionary();
+            sigDic.put(PdfName.Filter, filter);
+            sigDic.put(PdfName.SubFilter, subFilter);
+        }
+
+        @Override
+        public byte[] sign(InputStream data) throws GeneralSecurityException {
+            String hashAlgorithm = "SHA256";
+            BouncyCastleDigest digest = new BouncyCastleDigest();
+
+            try {
+                this.hash = DigestAlgorithms.digest(data, digest.getMessageDigest(hashAlgorithm));
+            } catch (IOException e) {
+                throw new GeneralSecurityException("PreSignatureContainer signing exception", e);
+            }
+
+            return new byte[0];
+        }
+
+        @Override
+        public void modifySigningDictionary(PdfDictionary signDic) {
+            signDic.putAll(sigDic);
+        }
+
+        public byte[] getHash() {
+            return hash;
+        }
+    }
+
+    /** @see #testSignLikeGovindB() */
+    static void createSignature(InputStream in, String signatures) throws Exception {
+        byte[] decodeSignature = Base64.decodeBase64(signatures);
+        PdfReader reader =  null;
+        reader = new PdfReader(in);
+        FileOutputStream outputStream = new FileOutputStream(new File(RESULT_FOLDER, "newZeal.pdf"));
+        PdfSigner.signDeferred(new PdfDocument(reader), "testing", outputStream, new ExternalPrecalculatedSignatureContainer(decodeSignature));
+        outputStream.close();
+    }
+
+    /** @see #testSignLikeGovindB() */
+    static class ExternalPrecalculatedSignatureContainer extends ExternalBlankSignatureContainer
+    {
+        byte[] cmsSignatureContents;
+
+        public ExternalPrecalculatedSignatureContainer(byte[] cmsSignatureContents) {
+            super(new PdfDictionary());
+            this.cmsSignatureContents = cmsSignatureContents;
+        }
+
+        @Override
+        public  byte[] sign(InputStream data) throws CertificateException, InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException {
+            return cmsSignatureContents;
+        }
+    }
+
 }
