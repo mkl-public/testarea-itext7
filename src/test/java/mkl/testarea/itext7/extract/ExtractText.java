@@ -1,15 +1,23 @@
 package mkl.testarea.itext7.extract;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor;
+import com.itextpdf.kernel.pdf.canvas.parser.filter.TextRegionEventFilter;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.FilteredTextEventListener;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.GlyphTextEventListener;
+import com.itextpdf.kernel.pdf.canvas.parser.listener.ITextExtractionStrategy;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.LocationTextExtractionStrategy;
 
 /**
@@ -17,13 +25,12 @@ import com.itextpdf.kernel.pdf.canvas.parser.listener.LocationTextExtractionStra
  */
 public class ExtractText
 {
+    final static File RESULT_FOLDER = new File("target/test-outputs", "extract");
 
-    /**
-     * @throws java.lang.Exception
-     */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
+        RESULT_FOLDER.mkdirs();
     }
 
     /**
@@ -151,6 +158,50 @@ public class ExtractText
             }
 
             System.out.printf("\nText from pdfsample.pdf\n=====\n%s\n=====", sb);
+        }
+    }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/73247134/extract-text-from-pdf-by-a-specific-area">
+     * Extract text from pdf by a specific area
+     * </a>
+     * <br/>
+     * <a href="https://www.docdroid.net/YsBTKuc/exe-pdf">
+     * exe.pdf
+     * </a>
+     * <p>
+     * iText text extraction filtering works for the full drawn string of text showing
+     * instructions, i.e. if some part of the drawn string is in the area of the region
+     * filter, the whole string is accepted. If one wants glyph-wise filtering instead,
+     * one should wrap the filtered extraction strategy in a {@link GlyphTextEventListener}.
+     * </p>
+     */
+    @Test
+    public void testExtractLikeAnassLaraki() throws IOException {
+        try (
+            InputStream resourceStream = getClass().getResourceAsStream("exe.pdf");
+            PdfReader pdfRead = new PdfReader(resourceStream);
+            PdfWriter pdfWriter = new PdfWriter(new File(RESULT_FOLDER, "exe-withRect.pdf"));
+            PdfDocument pdfdoc = new PdfDocument(pdfRead, pdfWriter)
+        ) {
+            Rectangle rect = new Rectangle((float)4.090625, (float)58.384375, (float)76.60625, (float)40.1625);
+            TextRegionEventFilter regionFilter = new TextRegionEventFilter(rect);
+
+            for (int page = 1; page <= pdfdoc.getNumberOfPages(); page++)
+            {
+                ITextExtractionStrategy strat = new FilteredTextEventListener(new LocationTextExtractionStrategy(), regionFilter);
+                String str = PdfTextExtractor.getTextFromPage(pdfdoc.getPage(page), strat);
+                System.out.printf("\nPage %d:\n----\n%s\n----\n", page, str);
+
+                strat = new GlyphTextEventListener(new FilteredTextEventListener(new LocationTextExtractionStrategy(), regionFilter));
+                str = PdfTextExtractor.getTextFromPage(pdfdoc.getPage(page), strat);
+                System.out.printf("\nglyphwise extraction:\n----\n%s\n----\n", str);
+
+                PdfCanvas pdfCanvas = new PdfCanvas(pdfdoc.getPage(page), true);
+                pdfCanvas.setStrokeColorRgb(1, 0, 0);
+                pdfCanvas.rectangle(rect);
+                pdfCanvas.stroke();
+            }
         }
     }
 }
