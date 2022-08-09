@@ -122,4 +122,34 @@ public class ChangedGraphics {
             }
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/73279755/pdfcleanuptool-setredactioncolor">
+     * PdfCleanUpTool SetRedactionColor
+     * </a>
+     * <p>
+     * In a comment the OP mentions that with the clean up color set to <code>null</code>
+     * the clean up process crashes. This cannot be reproduced.
+     * </p>
+     */
+    @Test
+    public void testJukkaLaattala1NoColor() throws IOException {
+        File dest = new File(RESULT_FOLDER, "orientation_result_no-color.pdf"); 
+        try (   InputStream resource = getClass().getResourceAsStream("TEST_PDF.pdf")) {
+            PdfDocument pdfDoc = new PdfDocument(new PdfReader(resource), new PdfWriter(dest));
+
+            List<PdfCleanUpLocation> cleanUpLocations = new ArrayList<PdfCleanUpLocation>();
+
+            // The arguments of the PdfCleanUpLocation constructor: the number of page to be cleaned up,
+            // a Rectangle defining the area on the page we want to clean up,
+            // a color which will be used while filling the cleaned area.
+            PdfCleanUpLocation location = new PdfCleanUpLocation(1, new Rectangle(97, 405, 383, 40), null);
+            cleanUpLocations.add(location);
+
+            PdfCleanUpTool cleaner = new PdfCleanUpTool(pdfDoc, cleanUpLocations, new CleanUpProperties());
+            cleaner.cleanUp();
+
+            pdfDoc.close();
+        }
+    }
 }
