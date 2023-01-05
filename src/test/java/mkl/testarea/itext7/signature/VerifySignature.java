@@ -132,4 +132,41 @@ public class VerifySignature {
             System.out.println();
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/75005703/adobe-acrobat-reader-and-foxit-reader-show-pdf-signature-valid-but-itext7-says-o">
+     * Adobe Acrobat Reader and Foxit reader show PDF Signature Valid but iText7 says otherwise
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1bvk5EckUrJ-dzehhQJyBGkM4QLrIF3Uk/view?usp=sharing">
+     * 3-HD-LAO-DONG-17.50.25-29.03.2022 (3).pdf
+     * </a>
+     * <p>
+     * Indeed, the second signature fails to validate in iText. As it turns
+     * out, the CMS container of that signature has an <code>eContent</code>
+     * element in its <code>EncapsulatedContentInfo </code>, and iText uses
+     * it in its validation code. On the other hand, this element contains an
+     * empty octet string which makes no sense at all in a PDF signature, so
+     * one can also understand that lax validators ignore it.
+     * </p>
+     */
+    @Test
+    public void testVerify3HdLaoDong17_50_25_29_03_2022() throws IOException, GeneralSecurityException {
+        System.out.println("\n\n3-HD-LAO-DONG-17.50.25-29.03.2022 (3)\n===================");
+
+        try (   InputStream resource = getClass().getResourceAsStream("3-HD-LAO-DONG-17.50.25-29.03.2022 (3).pdf") ) {
+            PdfDocument pdfDoc = new PdfDocument(new PdfReader(resource));
+            SignatureUtil signUtil = new SignatureUtil(pdfDoc);
+            List<String> names = signUtil.getSignatureNames();
+            for (String name : names) {
+                System.out.println("===== " + name + " =====");
+                System.out.println("Signature covers whole document: " + signUtil.signatureCoversWholeDocument(name));
+                System.out.println("Document revision: " + signUtil.getRevision(name) + " of " + signUtil.getTotalRevisions());
+                PdfPKCS7 pkcs7 = signUtil.readSignatureData(name);
+                System.out.println("Subject: " + CertificateInfo.getSubjectFields(pkcs7.getSigningCertificate()));
+                System.out.println("Integrity check OK? " + pkcs7.verifySignatureIntegrityAndAuthenticity());
+            }
+            System.out.println();
+        }
+    }
 }
