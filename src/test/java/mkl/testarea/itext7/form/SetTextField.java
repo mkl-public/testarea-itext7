@@ -138,4 +138,30 @@ public class SetTextField {
             pdfDocument.close();
         }
     }
+
+    /**
+     * <a href="https://stackoverflow.com/questions/75738984/why-itext7-did-not-find-the-form">
+     * Why itext7 did not find the form
+     * </a>
+     * <br/>
+     * <a href="https://drive.google.com/file/d/1892phrksdbMhRANsMWKzNWFt_m_1aO8r/view?usp=sharing">
+     * Т-1.pdf
+     * </a>
+     * <p>
+     * Cannot reproduce the issue, the field is found and filled as desired.
+     * </p>
+     */
+    @Test
+    public void testSetFieldLikeEkatarinaElInT1() throws IOException {
+        try (
+            InputStream resource = getClass().getResourceAsStream("Т-1.pdf");
+            PdfReader reader = new PdfReader(resource);
+            PdfWriter writer = new PdfWriter(new File(RESULT_FOLDER, "Т-1-filledIn.pdf"));
+            PdfDocument document = new PdfDocument(reader, writer);
+        ) {
+            PdfAcroForm form = PdfAcroForm.getAcroForm(document, true);
+            PdfFormField nameField = form.getField("employer_full_name");
+            nameField.setValue("The employer's full name");
+        }
+    }
 }
